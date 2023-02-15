@@ -7,8 +7,7 @@ class User_Database {
 
   void add_note({required String body, required String title}) {
     users.doc('R_Huynh')
-        .collection('Notes').doc('Note-01')
-        .set({'body': body, 'title': title});
+        .collection('Notes').add({'body': body, 'title': title});
   }
 
    getNotes() {
