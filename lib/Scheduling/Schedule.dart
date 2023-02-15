@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../Database/TestRW.dart';
-import '../Shared/constants.dart';
+import '../Database/Schedule Database.dart';
+import '../Login/Authentication/validator.dart';
 import 'package:lets_meet/Scheduling/Event.dart';
 
 class Schedule extends StatefulWidget {
@@ -50,12 +50,15 @@ class _CreateSchedule extends State<Schedule>{
   }
 
   String error = "";
-  bool check = false;
+
+  final _titleTextController = TextEditingController();
+  final _bodyTextController = TextEditingController();
+
+  bool remind = false;
+  bool repeat = false;
 
   Widget build(BuildContext context) {
     User_Database db = User_Database();
-    String title = "";
-    String body = "";
 
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');
@@ -69,8 +72,33 @@ class _CreateSchedule extends State<Schedule>{
         ),
         body: ListView (
           children: [
-            SizedBox(
-              height: 20,
+            const SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                      minimumSize: const Size(150, 30),
+                      shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: const BorderSide(color: Colors.red),
+                      )
+                  ),
+                  child: Text("Plan"),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                      minimumSize: const Size(150, 30),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: const BorderSide(color: Colors.red),
+                      )
+                  ),
+                  child: Text("Event"),
+                )
+              ],
             ),
             TableCalendar(
               focusedDay: _focusedDay,
@@ -98,22 +126,37 @@ class _CreateSchedule extends State<Schedule>{
               },
             ),
             TextFormField(
-              decoration: textInputDecoration.copyWith(hintText: 'Title'),
-              onChanged: (String text) {
-                title = text;
-              },
+              controller: _titleTextController,
+              decoration: InputDecoration(
+                hintText: "Title",
+                errorBorder: UnderlineInputBorder(
+                  borderRadius: BorderRadius.circular(6.0),
+                  borderSide: const BorderSide(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
             ),
             TextFormField(
-              decoration: textInputDecoration.copyWith(hintText: 'Details'),
-              onChanged: (String text) {
-                body = text;
-              },
+              controller: _bodyTextController,
+              validator: (value) => Validator.validateText(
+                text: value!,
+              ),
+              decoration: InputDecoration(
+                hintText: "Details",
+                errorBorder: UnderlineInputBorder(
+                  borderRadius: BorderRadius.circular(6.0),
+                  borderSide: const BorderSide(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
             ),
             ElevatedButton(
                 onPressed: () async {
                   final time = await pickTime();
                   if (time == null) return;
-                  final newDateTime = DateTime(dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
+                  final newDateTime = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day, time.hour, time.minute);
                   setState(() => dateTime = newDateTime);
                 },
                 child: Text('$hours:$minutes')),
@@ -122,27 +165,28 @@ class _CreateSchedule extends State<Schedule>{
               children: [
                 Text("Repeat? "),
                 Checkbox(
-                    value: false,
+                    value: repeat,
                     onChanged: (bool? value) {
                       setState(() {
-                        value = true;
+                        repeat = value!;
                       });
                     }),
                 Text("Remind? "),
                 Checkbox(
-                    value: check,
-                    onChanged: (bool? value) {setState(() {
-                      check = value!;
-                    });})
+                    value: remind,
+                    onChanged: (bool? value) {
+                      setState(() {
+                      remind = value!;
+                      });
+                    }),
               ],
             ),
             Container(
-              
               child: ElevatedButton(
                   onPressed: () {
                     eList.add(Event(dateTime, "New"));
-                    db.add_note(body: body, title: title);
-
+                    db.add_note(body: _bodyTextController.text, remind: remind, repeat: repeat, title: _titleTextController.text, time: dateTime);
+                    Navigator.pop(context);
                   },
                   child: const Text('Create')),
             )

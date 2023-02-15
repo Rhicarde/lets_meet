@@ -1,185 +1,165 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../Shared/constants.dart';
-import 'Login.dart';
-import 'VisiblePassword.dart';
+import 'Authentication/fire_auth.dart';
+import 'Authentication/validator.dart';
 
+// Class 'Constructor'
 class Register extends StatefulWidget{
+  final VoidCallback onClickedSignIn;
 
-  final Function? toggleView;
-  const Register({this.toggleView});
+  const Register({
+    Key? key,
+    required this.onClickedSignIn,
+  }) : super(key: key);
 
   @override
   _Register createState() => _Register();
 }
 
 class _Register extends State<Register> {
-  final _formKey = GlobalKey<FormState>();
 
-  bool loading = false;
+  // Parameters defined to be used later
+  final _registerFormKey = GlobalKey<FormState>();
 
-  late String email;
-  late String password;
-  String error = '';
-  bool _obscured = true;
+  final _nameTextController = TextEditingController();
+  final _emailTextController = TextEditingController();
+  final _passwordTextController = TextEditingController();
 
-
-  RegExp number = RegExp(r".*[0-9].*");
-  RegExp capital =  RegExp(r".*[A-Z].*");
-  RegExp lower =  RegExp(r".*[a-z].*");
-  RegExp special =  RegExp(r'[!@#$%^&*(),.?":{}|<>]');
-
-  String? lengthError;
-  String? numberError;
-  String? capitalError;
-  String? lowerError;
-  String? specialError;
-
-  List<Widget> errors =[];
-
-  bool isPasswordCompliant(String? pass, [int minLength = 10]) {
-    if (pass == null || pass.isEmpty) {
-      return false;
-    }
-
-    bool hasUppercase = capital.hasMatch(pass);
-    bool hasDigits = number.hasMatch(pass);
-    bool hasLowercase = lower.hasMatch(pass);
-    bool hasSpecialCharacters = special.hasMatch(pass);
-    bool hasMinLength = password.length > minLength;
-
-    errors = List.empty(growable: true);
-
-    if(!hasMinLength) {
-      errors.add(Text(lengthError?? ""));
-    }
-    if(!hasDigits) {
-      errors.add(Text(numberError ?? ""));
-    }
-    if(!hasUppercase) {
-      errors.add(Text(capitalError ?? ""));
-    }
-    if(!hasLowercase) {
-      errors.add(Text(lowerError ?? ""));
-    }
-    if(!hasSpecialCharacters) {
-      errors.add(Text(specialError ?? ""));
-    }
-
-    return hasDigits & hasUppercase & hasLowercase & hasSpecialCharacters & hasMinLength;
-  }
-
-
-  void checkPasswordErrors(String? pass){
-
-    lengthError = pass!.length < 10
-        ? "Password length should be at least 10"
-        : null;
-    numberError = !number.hasMatch(pass)
-        ? "Password must contain digits 0 - 9"
-        : null;
-    capitalError = !capital.hasMatch(pass)
-        ? "Password must contain a capital letter"
-        : null;
-    lowerError = !lower.hasMatch(pass)
-        ? "Password must contain lowercase letters"
-        : null;
-    specialError = !special.hasMatch(pass)
-        ? "Password must contain a special character"
-        : null;
-
-  }
-
-  void toggleVisibility(){
-    setState(()=> _obscured = !_obscured);
-  }
+  final _focusName = FocusNode();
+  final _focusEmail = FocusNode();
+  final _focusPassword = FocusNode();
 
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          centerTitle: Theme.of(context).appBarTheme.centerTitle,
-          title: Text('Lets Meet'),
+    return GestureDetector(
+        onTap: () {
+          _focusName.unfocus();
+          _focusEmail.unfocus();
+          _focusPassword.unfocus();
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+            centerTitle: Theme.of(context).appBarTheme.centerTitle,
+            title: const Text('Lets Plan'),
         ),
-        body: Container(
-            padding: const EdgeInsets.all(20),
-            child: Form(
-                key: _formKey,
-                child: Column(
+        body: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 20.0),
+                  child: Text('Sign Up',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                // Input Boxes for the Sign Up information
+                Form(
+                  key: _registerFormKey,
+                  child: Column(
                     children: <Widget>[
-                      Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.all(20),
-                          child: const Text('Sign up', style: TextStyle(fontSize: 20),)
-                      ),
-                      //Username
                       TextFormField(
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: textInputDecoration.copyWith(hintText: 'Email'),
-                          validator: (val) => val!.isEmpty ? "Enter an email" : null,
-                          onChanged: (val) {
-                            setState(() => email = val);
-                          }
-                      ),
-                      SizedBox(height: 20.0),
-                      //Password
-                      VisiblePassword(
-                          visible: _obscured,
-                          toggleVisibility: toggleVisibility,
-                          validator: ((pass){
-                            if (!isPasswordCompliant(pass)) {
-                              setState((){
-                                checkPasswordErrors(pass);
-                              });
-                              return "Password is not compliant.";
-                            }
-                            return null;
-                          }),
-                          onChanged: (val) {
-                            setState(() => password = val!);
-                          }
-                      ),
-                      Column(
-                          children: errors
-                      ),
-                      SizedBox(height: 20.0),
-                      Container(
-                        height: 50,
-                        width: double.infinity,
-                        child: ElevatedButton(
-                            child: const Text(
-                              "Register",
-                              style: TextStyle(color: Colors.white),
+                        controller: _nameTextController,
+                        focusNode: _focusName,
+                        // Checks for non-empty box
+                        validator: (value) => Validator.validateName(
+                          name: value!,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Name",
+                          errorBorder: UnderlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
                             ),
-                            onPressed: () {
-                                if (true){
-                                  setState(() {
-                                    error = 'Please supply a valid email';
-                                    loading = false;
-                                  });
-                                }
-                              }
+                          ),
                         ),
                       ),
-                      SizedBox(height: 10.0),
-                      Text(
-                        error,
-                        style: TextStyle(color: Colors.red, fontSize: 14.0),
+                      const SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _emailTextController,
+                        focusNode: _focusEmail,
+                        // Checks for valid email address
+                        validator: (value) => Validator.validateEmail(
+                          email: value!,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Email",
+                          errorBorder: UnderlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
                       ),
+                      const SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _passwordTextController,
+                        focusNode: _focusPassword,
+                        obscureText: true,
+                        // Checks for valid/secure password
+                        validator: (value) => Validator.validatePassword(
+                          password: value!,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Password",
+                          errorBorder: UnderlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32.0),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          const Text("Already Registered?", style: TextStyle(fontSize: 15),),
-                          TextButton(
-                              child: const Text('Sign in', style: TextStyle(fontSize: 15),
+                        children: [
+                          Expanded(
+                            // Sign Up Button - on pressed, will take in user inputs to create an account
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (_registerFormKey.currentState!.validate()) {
+                                  User? user = await FireAuth.registerUsingEmailPassword(
+                                    name: _nameTextController.text,
+                                    email: _emailTextController.text,
+                                    password: _passwordTextController.text,
+                                    context: context,
+                                    formKey: _registerFormKey,
+                                  );
+                                }
+                                },
+                              child: const Text(
+                                'Sign up',
+                                style: TextStyle(color: Colors.white),
                               ),
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignIn()));
-                              })
+                            ),
+                          ),
                         ],
-                      )
-                    ]
-                )
-            )
+                      ),
+                      // Text button used to return to Log In screen
+                      RichText(
+                          text: TextSpan(
+                              text: "Already have an account? ",
+                              style: const TextStyle(color: Colors.black, fontSize: 16),
+                              children: [
+                                TextSpan(
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = widget.onClickedSignIn,
+                                  text: "Sign In",
+                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 16),
+                                )
+                              ]
+                          )),
+                    ],
+                  ),
+                ),
+              ]
+            ),
+          )
+        )
         )
     );
   }
