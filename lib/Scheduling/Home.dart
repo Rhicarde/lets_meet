@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_meet/Notifications/Notification_Services.dart';
+import 'package:lets_meet/Profile/profile_screen.dart';
+import 'package:lets_meet/Scheduling/Weather/Weather.dart';
 import '../Database/Schedule Database.dart';
 import '../Login/Auth.dart';
-import '../Login/Login.dart';
-import '../main.dart';
 import 'Schedule.dart';
 
 class Home extends StatefulWidget {
@@ -24,8 +24,6 @@ class _Home extends State<Home>{
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
-
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -78,7 +76,7 @@ class _Home extends State<Home>{
         Container(
             color:  Colors.red,
             alignment: Alignment.center,
-            child: const Text("Upcoming")
+            child: const ShowNotification(),
         ),
         Column(
             children: [
@@ -93,7 +91,7 @@ class _Home extends State<Home>{
                   border: Border.all(color: Colors.green),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text("Weather"),
+                child: const WeatherPage(),
               ),
               const SizedBox(
                 height: 20,
@@ -135,7 +133,7 @@ class _Home extends State<Home>{
         Container(
             color:  Colors.blue,
             alignment: Alignment.center,
-            child: const Text("Settings")
+            child: const ProfileScreen(),
         ),
       ][index],
     );

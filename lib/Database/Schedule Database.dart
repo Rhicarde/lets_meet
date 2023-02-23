@@ -25,6 +25,26 @@ class User_Database {
           .collection('Notes').snapshots();
     }
   }
+
+  void createProfile({required String name, required String email}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null){
+      users.doc(user.uid)
+          .collection('Profile').add({'name': name, 'email': email});
+    }
+  }
+
+  getUserInfo() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null){
+      return users.doc(user.uid)
+          .collection('Profile').snapshots();
+    }
+  }
 }
 
 
