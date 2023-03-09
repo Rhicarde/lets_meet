@@ -75,11 +75,14 @@ class _Home extends State<Home>{
         ],
       ),
       body: <Widget> [
+        // Upcoming Events Container
         Container(
             color:  Colors.red,
             alignment: Alignment.center,
-            child: const Text("Upcoming")
+            // Display Events in Upcoming
+            child: DisplayEvents()
         ),
+
         Column(
             children: [
               const SizedBox(

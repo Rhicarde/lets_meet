@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../Database/Schedule Database.dart';
 import '../Login/Authentication/validator.dart';
 import 'package:lets_meet/Scheduling/Event.dart';
+import 'package:lets_meet/Scheduling/Notes.dart';
 
 class Schedule extends StatefulWidget {
 
@@ -88,7 +89,8 @@ class _CreateSchedule extends State<Schedule>{
                   child: Text("Plan"),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Event(DateTime.now(), "String")));
+                  },
                   style: TextButton.styleFrom(
                       minimumSize: const Size(150, 30),
                       shape: RoundedRectangleBorder(
@@ -189,6 +191,14 @@ class _CreateSchedule extends State<Schedule>{
                     Navigator.pop(context);
                   },
                   child: const Text('Create')),
+            ),
+            Container(
+              child: ElevatedButton(
+                onPressed: (){
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Notes()));
+                },
+                child: const Text('Notes')
+              )
             )
           ],
         )

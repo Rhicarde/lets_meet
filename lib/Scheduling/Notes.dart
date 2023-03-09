@@ -1,15 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
-class Note extends StatefulWidget{
+class Notes extends StatefulWidget{
   _CreateNote createState() => _CreateNote();
 
 }
 
-class _CreateNote extends State<Note>{
+class _CreateNote extends State<Notes>{
   // Initialize List and input string
   List Notes = [];
   String input = "";
+  String nid = "";
 
   @override
   void initState() {
@@ -17,8 +20,11 @@ class _CreateNote extends State<Note>{
     // Notes.add("Finish Code");
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -45,7 +51,13 @@ class _CreateNote extends State<Note>{
                             ),
                               actions:[ // Create button adding the new notes to the list of notes
                                 ElevatedButton(
-                                    onPressed: (){
+                                    onPressed: () async {
+                                      Map<String, dynamic> dataToSave = {
+                                        'Note': input
+                                      };
+                                      await FirebaseFirestore.instance.collection("Users").doc(user?.uid).collection('Schedules').doc("Notes").collection("Notes").add(dataToSave).then((DocumentReference doc){
+                                        nid = doc.id; // document id of newly created note
+                                      });
                                       setState(() {
                                         Notes.add(input);
                                       });
@@ -77,6 +89,9 @@ class _CreateNote extends State<Note>{
                         trailing: IconButton(
                           icon: Icon(Icons.delete_forever_rounded, color: Colors.red,),
                           onPressed: () {
+                            // deleting document from database when x is clicked
+                            FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc("Notes").collection("Notes").doc(nid).delete();
+
                             setState(() {
                               Notes.removeAt(index);
                             });
@@ -94,5 +109,7 @@ class _CreateNote extends State<Note>{
     );
 
 
+
   }
 }
+
