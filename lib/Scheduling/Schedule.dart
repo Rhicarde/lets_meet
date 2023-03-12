@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 import '../Database/Schedule Database.dart';
 import '../Login/Authentication/validator.dart';
 import 'package:lets_meet/Scheduling/Event.dart';
+import '../Shared/constants.dart';
 
 class Schedule extends StatefulWidget {
 
@@ -12,41 +13,18 @@ class Schedule extends StatefulWidget {
   _CreateSchedule createState() => _CreateSchedule();
 }
 
-class _CreateSchedule extends State<Schedule>{
-  late CalendarFormat _calendarFormat = CalendarFormat.month;
-  late DateTime dateTime = DateTime.now();
-  late DateTime _focusedDay = DateTime.now();
-  late DateTime _selectedDay = _focusedDay;
+class _CreateSchedule extends State<Schedule> {
+  TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
+  TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
 
-  DateTime currentDate = DateTime.now();
-  DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
-
-  late final ValueNotifier<List<Event>> _selectedEvents;
-  List<Event> eList = [Event(DateTime.now(), "Complete Homework")];
-
-  // TODO: Optimize!
-  List<Event> _getEventsForDay (DateTime day) {
-    List<Event> list = <Event>[];
-    for (Event e in eList) {
-      if (DateUtils.isSameDay(e.date, day)){
-        list.add(e);
-      }
-    }
-    return list;
-  }
+  DateTime dateTime = DateTime.now();
+  DateTime date = DateTime.now().subtract(Duration(days: DateTime
+      .now()
+      .day - 1));
 
   @override
   void initState() {
     super.initState();
-
-    _selectedDay = _focusedDay;
-    _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay));
-  }
-
-  void dispose() {
-    _focusedDay = DateTime.now();
-
-    super.dispose();
   }
 
   String error = "";
@@ -63,103 +41,135 @@ class _CreateSchedule extends State<Schedule>{
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');
 
+    String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+    dateInput.text = formattedDate;
+    String formattedTime = '$hours:$minutes';
+    timeInput.text = formattedTime;
+
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-            centerTitle: Theme.of(context).appBarTheme.centerTitle,
-            title: const Text('Lets Meet'),
+            backgroundColor: Theme
+                .of(context)
+                .appBarTheme
+                .backgroundColor,
+            centerTitle: Theme
+                .of(context)
+                .appBarTheme
+                .centerTitle,
+            title: const Text('Lets Plan'),
             actions: const <Widget>[]
         ),
-        body: ListView (
+        body: ListView(
           children: [
             const SizedBox(height: 10,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => Schedule()));
+                  },
                   style: TextButton.styleFrom(
                       minimumSize: const Size(150, 30),
                       shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: const BorderSide(color: Colors.red),
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: const BorderSide(color: Colors.grey),
                       )
                   ),
                   child: Text("Plan"),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(context, MaterialPageRoute(
+                        builder: (context) => Event(DateTime.now())));
+                  },
                   style: TextButton.styleFrom(
+                      primary: Colors.grey,
                       minimumSize: const Size(150, 30),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18.0),
-                        side: const BorderSide(color: Colors.red),
+                        side: const BorderSide(color: Colors.grey),
                       )
                   ),
                   child: Text("Event"),
                 )
               ],
             ),
-            TableCalendar(
-              focusedDay: _focusedDay,
-              firstDay: DateTime(DateTime.now().year, DateTime.now().month,) ,
-              lastDay: DateTime(DateTime.now().year, DateTime.now().month + 1, 0),
-              calendarFormat: _calendarFormat,
-              eventLoader: (day) {
-                return _getEventsForDay(day);
-              },
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                  _selectedEvents.value = _getEventsForDay(selectedDay);
-                });
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-              availableCalendarFormats: const {
-                CalendarFormat.month: 'Month'
-              },
-            ),
+            const SizedBox(height: 20,),
             TextFormField(
               controller: _titleTextController,
-              decoration: InputDecoration(
-                hintText: "Title",
-                errorBorder: UnderlineInputBorder(
-                  borderRadius: BorderRadius.circular(6.0),
-                  borderSide: const BorderSide(
-                    color: Colors.red,
-                  ),
-                ),
-              ),
+              decoration: textInputDecoration.copyWith(hintText: 'Title'),
             ),
             TextFormField(
               controller: _bodyTextController,
-              validator: (value) => Validator.validateText(
-                text: value!,
-              ),
-              decoration: InputDecoration(
-                hintText: "Details",
-                errorBorder: UnderlineInputBorder(
-                  borderRadius: BorderRadius.circular(6.0),
-                  borderSide: const BorderSide(
-                    color: Colors.red,
+              validator: (value) =>
+                  Validator.validateText(
+                    text: value!,
                   ),
-                ),
-              ),
+              decoration: textInputDecoration.copyWith(hintText: 'Description'),
             ),
-            ElevatedButton(
-                onPressed: () async {
-                  final time = await pickTime();
-                  if (time == null) return;
-                  final newDateTime = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day, time.hour, time.minute);
-                  setState(() => dateTime = newDateTime);
-                },
-                child: Text('$hours:$minutes')),
+            TextFormField(
+                controller: dateInput,
+                decoration: const InputDecoration(
+                    icon: Icon(Icons.calendar_today),
+                    labelText: "Enter Date"
+                ),
+                readOnly: true,
+                onTap: () async {
+                  await showDatePicker(context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    // range of dates that calendar shows
+                    lastDate: DateTime(DateTime
+                        .now()
+                        .year + 5),).then((pickedDate) {
+                    //then usually do the future job
+                    if (pickedDate == null) {
+                      //if user tap cancel then this function will stop
+                      return;
+                    }
+                    setState(() {
+                      //for rebuilding the ui
+                      // display new selected date
+                      formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+                      dateInput.text = formattedDate;
+                      // updated dateTime
+                      dateTime = DateTime(
+                          pickedDate.year, pickedDate.month, pickedDate.day,
+                          dateTime.hour, dateTime.minute);
+                    });
+                  });
+                }),
+            TextFormField(
+              controller: timeInput,
+              decoration: const InputDecoration(
+                  icon: Icon(Icons.timer),
+                  labelText: "Enter Time"
+              ),
+              readOnly: true,
+              onTap: () async {
+                final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(hour: DateTime
+                        .now()
+                        .hour, minute: DateTime
+                        .now()
+                        .minute));
+                if (time == null) return;
+                setState(() {
+                  //for rebuilding the ui
+                  // display new selected time
+                  String formattedTime = '$hours:$minutes';
+                  timeInput.text = formattedTime;
+                  // updated time
+                  dateTime = DateTime(
+                      dateTime.year, dateTime.month, dateTime.day, time.hour,
+                      time.minute);
+                });
+              },
+            ),
+            const SizedBox(height: 20,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -176,7 +186,7 @@ class _CreateSchedule extends State<Schedule>{
                     value: remind,
                     onChanged: (bool? value) {
                       setState(() {
-                      remind = value!;
+                        remind = value!;
                       });
                     }),
               ],
@@ -184,8 +194,12 @@ class _CreateSchedule extends State<Schedule>{
             Container(
               child: ElevatedButton(
                   onPressed: () {
-                    eList.add(Event(dateTime, "New"));
-                    db.add_note(body: _bodyTextController.text, remind: remind, repeat: repeat, title: _titleTextController.text, time: dateTime);
+                    print(dateTime);
+                    db.add_note(body: _bodyTextController.text,
+                        remind: remind,
+                        repeat: repeat,
+                        title: _titleTextController.text,
+                        time: dateTime);
                     Navigator.pop(context);
                   },
                   child: const Text('Create')),
@@ -194,11 +208,5 @@ class _CreateSchedule extends State<Schedule>{
         )
     );
   }
-
-  Future<TimeOfDay?> pickTime() => showTimePicker(
-      context: context, 
-      initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute));
 }
-
-
 

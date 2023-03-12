@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_meet/Notifications/Notification_Services.dart';
 import 'package:lets_meet/Profile/profile_screen.dart';
+import 'package:lets_meet/Scheduling/Notes.dart';
 import 'package:lets_meet/Scheduling/Weather/Weather.dart';
 import '../Database/Schedule Database.dart';
 import '../Login/Auth.dart';
@@ -28,10 +29,10 @@ class _Home extends State<Home>{
       appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
-          title: const Text('Lets Meet'),
+          title: const Text('Lets Plan'),
           actions: <Widget>[
             Padding(
-                padding: EdgeInsets.only(right: 20.0),
+                padding: const EdgeInsets.only(right: 20.0),
                 child: GestureDetector(
                   child: const Icon(
                     Icons.exit_to_app,
@@ -47,7 +48,7 @@ class _Home extends State<Home>{
           ]
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
           onPressed: () {
             Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => Schedule()));
@@ -110,7 +111,7 @@ class _Home extends State<Home>{
                           onPressed: () {
                             showDialog(
                               context: context,
-                              builder: (ctx) => AlertDialog(
+                              builder: (ctx) => Note()/*AlertDialog(
                                 title: const Text("Declined"),
                                 content: const Text("Compare request has been declined"),
                                 actions: [
@@ -120,7 +121,7 @@ class _Home extends State<Home>{
                                       },
                                       child: const Text("Ok")),
                                 ],
-                              ),
+                              )*/,
                             );
                           },
                           child: const Text("Share")),
