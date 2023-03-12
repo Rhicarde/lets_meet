@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   line_awesome_flutter: ^2.0.0
   firebase_core: ^2.3.0
-  cloud_firestore: ^4.1.0
+  cloud_firestore: ^4.4.3
   firebase_auth: ^4.1.4
   geolocator: ^9.0.2
   weather:
@@ -47,6 +47,8 @@ dependencies:
   flutter_local_notifications: ^13.0.0
 
   search_map_location: ^0.0.6
+  google_maps_webservice: ^0.0.20-nullsafety.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
