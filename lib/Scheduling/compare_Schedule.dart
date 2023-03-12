@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../Shared/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_meet/Scheduling/Event.dart';
 
@@ -22,7 +21,7 @@ class _CreateSchedule extends State<create_Schedule>{
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
 
   late final ValueNotifier<List<Event>> _selectedEvents;
-  List<Event> eList = [Event(DateTime.now(), "Complete Homework"), Event(DateTime(2022, 10, 11, 17, 30), "Walk Dog"), Event(DateTime(2022, 10, 22, 11, 30), "Dentist Appointment"), Event(DateTime(2022, 10, 22, 11, 20), "Exam"), Event(DateTime(2022, 10, 22, 9, 30), "CECS 329: LO7"),];
+  List<Event> eList = [];
 
   // TODO: Optimize!
   List<Event> _getEventsForDay (DateTime day) {
@@ -35,9 +34,9 @@ class _CreateSchedule extends State<create_Schedule>{
     if (list.length > 1) {
       for (int i = 0; i < (list.length - 1); i++) {
         for (int j = 1; j < (list.length); j++) {
-          if (list[i].date.hour == list[j].date.hour) {
-            list[i].color = Colors.red;
-            list[j].color = Colors.red;
+          if (list[i].date?.hour == list[j].date?.hour) {
+            //list[i].color = Colors.red;
+            //list[j].color = Colors.red;
           }
         }
       }

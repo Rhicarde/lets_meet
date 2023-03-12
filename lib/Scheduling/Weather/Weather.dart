@@ -34,28 +34,34 @@ class _WeatherPage extends State<WeatherPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (_response != null)
-                    Column(
-                      children: [
-                        Image.network(_response!.iconUrl),
-                        Text(
-                          '${_response!.tempInfo.temperature}°',
-                          style: TextStyle(fontSize: 25),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.network(_response!.iconUrl),
+                          Text(
+                            '${_response!.tempInfo.temperature}°',
+                            style: TextStyle(fontSize: 25),
+                          ),
+                          Text(_response!.weatherInfo.description)
+                    ]
+                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 25),
+                        child: SizedBox(
+                          width: 150,
+                          child: TextField(
+                              controller: _cityTextController,
+                              decoration: InputDecoration(labelText: 'City'),
+                              textAlign: TextAlign.center),
                         ),
-                        Text(_response!.weatherInfo.description)
-                      ],
-                    ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 25),
-                    child: SizedBox(
-                      width: 150,
-                      child: TextField(
-                          controller: _cityTextController,
-                          decoration: InputDecoration(labelText: 'City'),
-                          textAlign: TextAlign.center),
-                    ),
+                      ),
+                      // Creates the search button
+                      ElevatedButton(onPressed: _search, child: Text('Search'))
+                    ]
                   ),
-                  // Creates the search button
-                  ElevatedButton(onPressed: _search, child: Text('Search'))
                 ],
               ),
             )

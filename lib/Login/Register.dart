@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../Database/Schedule Database.dart';
 import 'Authentication/fire_auth.dart';
 import 'Authentication/validator.dart';
 
@@ -18,6 +19,7 @@ class Register extends StatefulWidget{
 }
 
 class _Register extends State<Register> {
+  User_Database db = User_Database();
 
   // Parameters defined to be used later
   final _registerFormKey = GlobalKey<FormState>();
@@ -38,6 +40,7 @@ class _Register extends State<Register> {
           _focusPassword.unfocus();
         },
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             centerTitle: Theme.of(context).appBarTheme.centerTitle,
@@ -45,119 +48,177 @@ class _Register extends State<Register> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 20.0),
-                  child: Text('Sign Up',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-                // Input Boxes for the Sign Up information
-                Form(
-                  key: _registerFormKey,
-                  child: Column(
-                    children: <Widget>[
-                      TextFormField(
-                        controller: _nameTextController,
-                        focusNode: _focusName,
-                        // Checks for non-empty box
-                        validator: (value) => Validator.validateName(
-                          name: value!,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Name",
-                          errorBorder: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(6.0),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      TextFormField(
-                        controller: _emailTextController,
-                        focusNode: _focusEmail,
-                        // Checks for valid email address
-                        validator: (value) => Validator.validateEmail(
-                          email: value!,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Email",
-                          errorBorder: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(6.0),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      TextFormField(
-                        controller: _passwordTextController,
-                        focusNode: _focusPassword,
-                        obscureText: true,
-                        // Checks for valid/secure password
-                        validator: (value) => Validator.validatePassword(
-                          password: value!,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Password",
-                          errorBorder: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(6.0),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32.0),
-                      Row(
-                        children: [
-                          Expanded(
-                            // Sign Up Button - on pressed, will take in user inputs to create an account
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                if (_registerFormKey.currentState!.validate()) {
-                                  User? user = await FireAuth.registerUsingEmailPassword(
-                                    name: _nameTextController.text,
-                                    email: _emailTextController.text,
-                                    password: _passwordTextController.text,
-                                    context: context,
-                                    formKey: _registerFormKey,
-                                  );
-                                }
-                                },
-                              child: const Text(
-                                'Sign up',
-                                style: TextStyle(color: Colors.white),
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                    children: [
+                      // Input Boxes for the Sign Up information
+                      Form(
+                        key: _registerFormKey,
+                        child: Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Text('Create Account',
+                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                    ),
+                                  ]
                               ),
-                            ),
+                              const SizedBox(height: 50,),
+                              Row(
+                                  children: [
+                                    const Icon(Icons.person_outline),
+                                    const SizedBox(width: 10,),
+                                    SizedBox(
+                                      width: 300,
+                                      child: TextFormField(
+                                        controller: _nameTextController,
+                                        focusNode: _focusName,
+                                        // Checks for non-empty box
+                                        validator: (value) => Validator.validateName(
+                                          name: value!,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: "Name",
+                                          border: InputBorder.none,
+                                          errorBorder: UnderlineInputBorder(
+                                            borderRadius: BorderRadius.circular(6.0),
+                                            borderSide: const BorderSide(
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                              ),
+                              const SizedBox(height: 20.0),
+                              Row(
+                                  children: [
+                                    const Icon(Icons.mail_outline),
+                                    const SizedBox(width: 10,),
+                                    SizedBox(
+                                      width: 300,
+                                      child: TextFormField(
+                                        controller: _emailTextController,
+                                        focusNode: _focusEmail,
+                                        // Checks for valid email address
+                                        validator: (value) => Validator.validateEmail(
+                                          email: value!,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: "Email",
+                                          border: InputBorder.none,
+                                          errorBorder: UnderlineInputBorder(
+                                            borderRadius: BorderRadius.circular(6.0),
+                                            borderSide: const BorderSide(
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                              ),
+                              const SizedBox(height: 16.0),
+                              Row(
+                                  children: [
+                                    const Icon(Icons.lock_outline),
+                                    const SizedBox( width: 10,),
+                                    SizedBox(
+                                      width: 300,
+                                      child: TextFormField(
+                                        controller: _passwordTextController,
+                                        focusNode: _focusPassword,
+                                        obscureText: true,
+                                        // Checks for valid/secure password
+                                        validator: (value) => Validator.validatePassword(
+                                          password: value!,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: "Password",
+                                          border: InputBorder.none,
+                                          errorBorder: UnderlineInputBorder(
+                                            borderRadius: BorderRadius.circular(6.0),
+                                            borderSide: const BorderSide(
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                              ),
+                              const SizedBox(height: 32.0),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        minimumSize: MaterialStateProperty.all<Size>(
+                                            const Size(150,50)
+                                        ),
+                                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                            RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(50.0),
+                                            )
+                                        )
+                                    ),
+                                    onPressed: () async {
+                                      if (_registerFormKey.currentState!.validate()) {
+                                        User? user = await FireAuth.registerUsingEmailPassword(
+                                          name: _nameTextController.text,
+                                          email: _emailTextController.text,
+                                          password: _passwordTextController.text,
+                                          context: context,
+                                          formKey: _registerFormKey,
+                                        );
+                                        db.createProfile(name: _nameTextController.text, email: _emailTextController.text);
+                                      }
+                                    },
+                                    child: Row(
+                                        children: const [
+                                          Text('Sign up',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                          SizedBox(width: 10,),
+                                          Icon(Icons.arrow_forward),
+                                        ]
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                      // Text button used to return to Log In screen
-                      RichText(
-                          text: TextSpan(
-                              text: "Already have an account? ",
-                              style: const TextStyle(color: Colors.black, fontSize: 16),
-                              children: [
-                                TextSpan(
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = widget.onClickedSignIn,
-                                  text: "Sign In",
-                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 16),
-                                )
-                              ]
-                          )),
-                    ],
-                  ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: // Text button used to return to Log In screen
+                        RichText(
+                            text: TextSpan(
+                                text: "Already have an account? ",
+                                style: const TextStyle(color: Colors.black, fontSize: 16),
+                                children: [
+                                  TextSpan(
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = widget.onClickedSignIn,
+                                    text: "Sign In",
+                                    style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 16),
+                                  )
+                                ]
+                            )
+                        ),
+                      )
+                    ]
                 ),
-              ]
-            ),
+              )
+            ],
           )
         )
         )

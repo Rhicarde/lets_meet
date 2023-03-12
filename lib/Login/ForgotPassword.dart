@@ -15,7 +15,7 @@ class _ForgotPassword extends State<ForgotPassword> {
 
   final _emailTextController = TextEditingController();
 
-
+  // Widgets to build screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,37 +40,61 @@ class _ForgotPassword extends State<ForgotPassword> {
                       key: _formKey,
                       child: Column(
                         children: <Widget>[
-                          TextFormField(
-                            controller: _emailTextController,
-                            validator: (value) => Validator.validateEmail(
-                              email: value!,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: "Enter Email",
-                              errorBorder: UnderlineInputBorder(
-                                borderRadius: BorderRadius.circular(6.0),
-                                borderSide: const BorderSide(
-                                  color: Colors.red,
+                          Row(
+                            children: [
+                              const Icon(Icons.email_outlined),
+                              const SizedBox(width: 10,),
+                              // Creating textbox to input user email
+                              SizedBox(
+                                width: 300,
+                                child: TextFormField(
+                                  controller: _emailTextController,
+                                  validator: (value) => Validator.validateEmail(
+                                    email: value!,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: "Enter Email",
+                                    border: InputBorder.none,
+                                    errorBorder: UnderlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6.0),
+                                      borderSide: const BorderSide(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ]
                           ),
                           const SizedBox(height: 16.0),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: Size.fromHeight(50),
+                          // Submit email for password reset
+                          ElevatedButton(
+                            style: ButtonStyle(
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50.0),
+                                    )
+                                )
                             ),
-                            icon: Icon(Icons.email_outlined),
-                            label: Text('Reset Password',
-                              style: TextStyle(fontSize: 24),),
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
                                 await FireAuth.resetPassword(
                                     email: _emailTextController.text,
                                     context: context);
                               }
+                              // Returns to login screen
                               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()));
-                            }
+                            },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                            Text('Reset Password',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            SizedBox(width: 10,),
+                            Icon(Icons.arrow_forward),
+                          ]
+                      ),
                           )
 
                         ],
