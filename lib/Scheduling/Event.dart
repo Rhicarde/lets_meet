@@ -14,7 +14,7 @@ import 'package:search_map_location/search_map_location.dart';
 // TODO: Add Time
 class Event extends StatefulWidget {
   // constructor
-  Event(DateTime current_date, String s);
+  Event(DateTime current_date);
   // getter for date
   DateTime? get date => null;
 

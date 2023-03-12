@@ -117,7 +117,7 @@ class _Home extends State<Home>{
                           onPressed: () {
                             showDialog(
                               context: context,
-                              builder: (ctx) => Note()/*AlertDialog(
+                              builder: (ctx) => Notes()/*AlertDialog(
                                 title: const Text("Declined"),
                                 content: const Text("Compare request has been declined"),
                                 actions: [
@@ -135,6 +135,7 @@ class _Home extends State<Home>{
                   ]
               ),
               Expanded(child: DisplaySchedule(),),
+              Expanded(child: DisplayEvents(),),
             ]
         ),
         Container(
