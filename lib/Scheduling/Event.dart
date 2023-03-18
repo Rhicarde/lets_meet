@@ -33,6 +33,7 @@ class _CreateEvent extends State<Event>{
   late DateTime _selectedDay = _focusedDay;
   DateTime currentDate = DateTime.now();
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+  TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
 
 
   // Getters
@@ -135,6 +136,22 @@ class _CreateEvent extends State<Event>{
                   });
                 },
             ),
+            // Time Display
+            // Time Selector Button
+            ElevatedButton(
+                child: Text('${time.hour}:${time.minute}'),
+                onPressed: () async {
+                  TimeOfDay? newTime = await showTimePicker(
+                      context: context,
+                      initialTime: time);
+
+                  // Cancel return NUll
+                  if (newTime == null) return;
+
+                  // OK return TimeofDay
+                  setState(() => time = newTime);
+
+                }),
             // TextFormField for Location Selection
             SearchLocation(
               apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y', // Google Places API key
