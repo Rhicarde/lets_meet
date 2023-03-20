@@ -43,7 +43,6 @@ class _CreateEvent extends State<Event>{
 
 
 
-
   // Event List Declaration
   late final ValueNotifier<List<Event>> _selectedEvents;
   List<Event> eList = [];
@@ -69,6 +68,7 @@ class _CreateEvent extends State<Event>{
   String event_comment = "";
   String input_comment = "";
   String cid = "";
+  String db_time = "";
   //final DateTime date;
   //final String state;
   Color color = Colors.blue;
@@ -149,7 +149,10 @@ class _CreateEvent extends State<Event>{
                   if (newTime == null) return;
 
                   // OK return TimeofDay
-                  setState(() => time = newTime);
+                  setState(() {
+                    time = newTime;
+                  });
+                  db_time = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
                 }),
             // TextFormField for Location Selection
@@ -238,6 +241,7 @@ class _CreateEvent extends State<Event>{
                       'Title': db_title,
                       'Description': db_body,
                       'Date': dateinput.text,
+                      'Time': db_time,
                       'Location': db_location,
                       'Repeat': check1,
                       'Remind': check2,

@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
   // Loads up app's main page on startup
   @override
   Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
         scaffoldMessengerKey: Utils.messengerKey,
         navigatorKey: navigatorKey,
         title: "Lets Plan",
