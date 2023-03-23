@@ -41,7 +41,7 @@ class User_Database {
       }
       words.removeAt(0);
     }
-
+    
     return titleSearchList;
   }
 
@@ -230,13 +230,13 @@ class ReadEvents extends State<DisplayEvents> {
           return ListView(
             children: snapshot.data!.docs.map((event) {
               return GestureDetector(
-                key: Key(event.get('Title')),
+                key: Key(event.get('title')),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: event))),
                 child: Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     child:ListTile(
-                      title: Text(event.get('Title')),
+                      title: Text(event.get('title')),
                       // Delete Event Button
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_forever_rounded, color: Colors.red,),

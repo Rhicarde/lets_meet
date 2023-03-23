@@ -33,13 +33,13 @@ class _CreateEvent extends State<Event>{
   late DateTime _selectedDay = _focusedDay;
   DateTime currentDate = DateTime.now();
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+  TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
 
 
   // Getters
   get db => null;
   get hours => null;
   get minutes => null;
-
 
 
 
@@ -68,6 +68,7 @@ class _CreateEvent extends State<Event>{
   String event_comment = "";
   String input_comment = "";
   String cid = "";
+  String db_time = "";
   //final DateTime date;
   //final String state;
   Color color = Colors.blue;
@@ -181,8 +182,8 @@ class _CreateEvent extends State<Event>{
                   });
                 }),
             const SizedBox(height: 20,),
-                },
-            ),
+
+
             // Time Display
             // Time Selector Button
             ElevatedButton(
@@ -285,13 +286,13 @@ class _CreateEvent extends State<Event>{
                     db_location = result as String;
                     //saving event data to database
                     Map<String, dynamic> dataToSave = {
-                      'Title': db_title,
-                      'Description': db_body,
-                      'Date': dateTime,
-                      'Location': db_location,
-                      'Repeat': check1,
-                      'Remind': check2,
-                      'Comments': input_comment
+                      'title': db_title,
+                      'description': db_body,
+                      'date': dateTime,
+                      'location': db_location,
+                      'repeat': check1,
+                      'remind': check2,
+                      'comments': [input_comment]
                     };
 
                     // Add data to database
@@ -299,7 +300,7 @@ class _CreateEvent extends State<Event>{
                     // eList.add(Event(dateTime, "New"));
                     // db.add_note(body: body, title: title);
                     //Navigator.pop(Schedule());
-                    Navigator.of(context).pop();
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Schedule()));
                   },
                   // Create Event Button
                   child: const Text('Create')),
@@ -310,7 +311,7 @@ class _CreateEvent extends State<Event>{
   }
 
 
-  Future<TimeOfDay?> pickTime() => showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute));
+Future<TimeOfDay?> pickTime() => showTimePicker(
+    context: context,
+    initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute));
 }
