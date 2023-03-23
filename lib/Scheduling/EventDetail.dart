@@ -22,8 +22,6 @@ class EventDetail extends State<DisplayEventDetail> {
   final _locationTextController = TextEditingController();
   final _commentTextController = TextEditingController();
 
-  String _showComment = "";
-
   TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
 
@@ -148,25 +146,31 @@ class EventDetail extends State<DisplayEventDetail> {
                     }),
               ],
             ),
+            // TODO: Create Row and TextFormField and place Add button on right
+            // Change Alert Dialog to Row
+            // TODO: Display username next to comment
             SingleChildScrollView(
               child: Column(
                 children: [
                   for (var comment in widget.event.get('comments')) Text(comment),
                   ElevatedButton(
-                      child: Text('Edit'),
+                      child: Text('Add'),
                    onPressed: () async {
                         showDialog(context: context,
                         builder: (BuildContext context){
                         return AlertDialog(
-                          title: Text("Edit Comment"),
+                          title: Text("Add Comment"),
                           content: TextField(
                           decoration: InputDecoration(
                           hintText: "New Comment"),
                           onChanged: (String value){
-                          List _oldArray = [];
-                          _oldArray = widget.event.get('comments');
-                          _oldArray[0] = value;
-                          FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').doc('UqXeStlb1bCcDo53n6Ao').update({'comments': _oldArray});
+                            setState(() {
+                              String _documentID = widget.event.id;
+                              List _oldArray = [];
+                              _oldArray = widget.event.get('comments');
+                              _oldArray.add(value);
+                              FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').doc(_documentID).update({'comments': _oldArray});
+                            });
                            },
                           ),
                           actions: [
