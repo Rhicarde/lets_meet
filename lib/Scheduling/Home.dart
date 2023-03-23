@@ -12,6 +12,8 @@ import '../Login/Login.dart';
 import '../main.dart';
 import 'Schedule.dart';
 
+// The main home screen that the user see's when logging on
+// Displays weather, date, schedule, and event made for given day
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -19,17 +21,8 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home>{
-  User_Database db = User_Database();
-
-  int index = 1;
-  bool _checked = false;
-  bool _checked_01 = false;
-
-
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
-
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -59,33 +52,7 @@ class _Home extends State<Home>{
                 MaterialPageRoute(builder: (context) => Schedule()));
           }
       ),
-      bottomNavigationBar: NavigationBar(
-        height: 60,
-        selectedIndex: index,
-        onDestinationSelected: (index) => setState(() => this.index = index),
-        destinations: const [
-          NavigationDestination(
-              icon: Icon(Icons.punch_clock_outlined),
-              selectedIcon: Icon(Icons.punch_clock),
-              label: 'Upcoming'),
-          NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Home'),
-          NavigationDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: 'Settings')
-        ],
-      ),
-      body: <Widget> [
-        // Upcoming Events Container
-        Container(
-            color:  Colors.red,
-            alignment: Alignment.center,
-            child: const ShowNotification(),
-        ),
-        Column(
+      body: Column(
             children: [
               const SizedBox(
                 height: 10,
@@ -135,15 +102,11 @@ class _Home extends State<Home>{
                   ]
               ),
               Expanded(child: DisplaySchedule(),),
+              const Center(
+                  child: Text("Events", style: TextStyle(fontWeight: FontWeight.bold))),
               Expanded(child: DisplayEvents(),),
             ]
         ),
-        Container(
-            color:  Colors.blue,
-            alignment: Alignment.center,
-            child: const ProfileScreen(),
-        ),
-      ][index],
     );
   }
 }

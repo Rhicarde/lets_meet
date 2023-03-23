@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../Scheduling/Home.dart';
+import '../Scheduling/TabManager.dart';
 import 'Authentication/fire_auth.dart';
 
 // Class used to check that logged in user has a verified email
@@ -75,7 +76,7 @@ class _ProfileVerificationState extends State<ProfileVerification> {
   // Else, display email verification screen
   @override
   Widget build(BuildContext context) => _isEmailVerified
-          ? Home()
+          ? const Pages()
           : Scaffold(
               appBar: AppBar(
                 title: const Text('Verify Email'),
