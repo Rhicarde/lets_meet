@@ -289,6 +289,7 @@ class _CreateEvent extends State<Event>{
                       'title': db_title,
                       'description': db_body,
                       'date': dateTime,
+                      'time': db_time,
                       'location': db_location,
                       'repeat': check1,
                       'remind': check2,

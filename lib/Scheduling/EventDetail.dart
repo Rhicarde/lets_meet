@@ -30,15 +30,17 @@ class EventDetail extends State<DisplayEventDetail> {
     _titleTextController.text = widget.event.get('title');
     _bodyTextController.text = widget.event.get('description');
     _locationTextController.text = widget.event.get('location');
+    timeInput.text = widget.event.get('time');
 
     // Get Timestamp from Firebase and Convert to DateTime
     DateTime dateTime = widget.event.get('date').toDate();
-
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');
 
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
     dateInput.text = formattedDate;
+    TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
+
 
     // Time not yet implemented
     /*
@@ -72,12 +74,35 @@ class EventDetail extends State<DisplayEventDetail> {
               decoration: textInputDecoration.copyWith(hintText: 'Location'),
             ),
             TextFormField(
+              controller: timeInput,
+              decoration: const InputDecoration(
+                icon:Icon(Icons.access_time_outlined),
+                labelText: "Pick Time"
+              ),
+              readOnly: false,
+                onTap: () async {
+                  TimeOfDay? newTime = await showTimePicker(
+                      context: context,
+                      initialTime: time);
+
+                  // Cancel return NUll
+                  if (newTime == null) return;
+
+                  // OK return TimeofDay
+                  setState(() {
+                    time = newTime;
+                  });
+                  //db_time = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+                }
+            ),
+            TextFormField(
                 controller: dateInput,
                 decoration: const InputDecoration(
                     icon:Icon(Icons.calendar_today),
                     labelText: "Enter Date"
                 ),
-                readOnly: true,
+                readOnly: false,
                 onTap: () async{
                   await showDatePicker(context: context,
                     initialDate: DateTime.now(),
