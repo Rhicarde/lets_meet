@@ -2,6 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:lets_meet/Login/ProfileVerification.dart';
+import 'package:lets_meet/Scheduling/Home.dart';
+import 'package:lets_meet/Scheduling/ItemChecklist.dart';
+import 'package:lets_meet/Scheduling/Weather/Weather.dart';
+import 'package:weather/weather.dart';
 
 import 'Login/Auth.dart';
 import 'Login/Authentication/fire_auth.dart';
@@ -24,7 +28,7 @@ class MyApp extends StatelessWidget {
         scaffoldMessengerKey: Utils.messengerKey,
         navigatorKey: navigatorKey,
         title: "Lets Plan",
-        home: MainPage()
+        home: Home()
   );
 }
 
