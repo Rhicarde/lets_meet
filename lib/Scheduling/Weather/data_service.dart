@@ -5,11 +5,13 @@ import 'package:http/http.dart' as http;
 
 // Interacts with the OpenWeather API to gather weather data
 class DataService {
-  Future<WeatherResponse> getWeather(String city) async {
+  Future<WeatherResponse> getWeather(double latitude, double longitude) async {
 
     // Lists parameters for types of data retrieved, as well as our API key
     final queryParameters = {
-      'q': city,
+      //'q': city,
+      'lat': latitude,
+      'lon': longitude,
       'appid': '3199aa90be7e6cdf53f25ea0565568e5',
       'units': 'imperial'
     };
