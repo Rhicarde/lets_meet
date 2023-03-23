@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../Scheduling/EventDetail.dart';
 import '../Scheduling/PlanDetail.dart';
 
 class User_Database {
@@ -123,6 +124,18 @@ class User_Database {
       return users.doc(user.uid).collection('Schedules').doc('Event').collection('Event').snapshots();
     }
   }
+
+  void remove_event({required String id}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Event').collection('Event')
+          .doc(id).delete();
+    }
+  }
 }
 
 // Database Read Material
@@ -216,21 +229,25 @@ class ReadEvents extends State<DisplayEvents> {
           }
           return ListView(
             children: snapshot.data!.docs.map((event) {
-              return Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                  ),
-                  padding: const EdgeInsets.fromLTRB(20,30,20,30),
-                  alignment: Alignment.center,
-                  child:
-                  ExpansionTile (
-                    title: Text(event.get('Title') as String),
-                    children: [Text(event.get('Description') as String),
-                     Text(event.get("Date") as String),
-                      Text(event.get("Location") as String),
-                    Text(event.get("Comments") as String)
-            ],
-                  )
+              return GestureDetector(
+                key: Key(event.get('Title')),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: event))),
+                child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    child:ListTile(
+                      title: Text(event.get('Title')),
+                      // Delete Event Button
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_forever_rounded, color: Colors.red,),
+                        onPressed: () {
+                          setState(() {
+                            db.remove_event(id: event.id);
+                          });
+                        },
+                      ),
+                    )
+                ),
               );
             }).toList(),
           );

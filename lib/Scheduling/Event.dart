@@ -10,8 +10,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../Shared/constants.dart';
 import 'package:search_map_location/search_map_location.dart';
 
-
-// TODO: Add Time
+// TODO: Link created event to schedule
 class Event extends StatefulWidget {
   // constructor
   Event(DateTime current_date);
@@ -22,15 +21,13 @@ class Event extends StatefulWidget {
 }
 
 class _CreateEvent extends State<Event>{
-  TextEditingController dateinput = TextEditingController(); // text editing controller for date text field
+  TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController event_title = TextEditingController();
   TextEditingController description = TextEditingController();
   TextEditingController location = TextEditingController();
   // Variable Declarations
   // late CalendarFormat _calendarFormat = CalendarFormat.month;
   late DateTime dateTime = DateTime.now();
-  late DateTime _focusedDay = DateTime.now();
-  late DateTime _selectedDay = _focusedDay;
   DateTime currentDate = DateTime.now();
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
 
@@ -39,8 +36,6 @@ class _CreateEvent extends State<Event>{
   get db => null;
   get hours => null;
   get minutes => null;
-
-
 
 
   // Event List Declaration
@@ -98,6 +93,39 @@ class _CreateEvent extends State<Event>{
         ),
         body: ListView (
           children: [
+            SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Schedule()));
+                  },
+                  style: TextButton.styleFrom(
+                      primary: Colors.grey,
+                      minimumSize: const Size(150, 30),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: const BorderSide(color: Colors.grey),
+                      )
+                  ),
+                  child: Text("Plan"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Event(DateTime.now())));
+                  },
+                  style: TextButton.styleFrom(
+                      minimumSize: const Size(150, 30),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: const BorderSide(color: Colors.grey),
+                      )
+                  ),
+                  child: Text("Event"),
+                )
+              ],
+            ),
             SizedBox(
               height: 20,
             ),
@@ -118,23 +146,36 @@ class _CreateEvent extends State<Event>{
             // Date Selection Button
             // Upon Selecting a date display it on the button.
             TextFormField(
-                controller: dateinput,
+                controller: dateInput,
                 decoration: const InputDecoration(
-                  icon:Icon(Icons.calendar_today),
-                  labelText: "Enter Date"
+                    icon: Icon(Icons.calendar_today),
+                    labelText: "Enter Date"
                 ),
                 readOnly: true,
-                onTap: () async{
-                  DateTime? selectedDate = await showDatePicker(context: context,
+                onTap: () async {
+                  await showDatePicker(context: context,
                     initialDate: DateTime.now(),
-                    firstDate: DateTime(2000), // range of dates that calendar shows
-                    lastDate: DateTime(2025),);
-                  formattedDate = DateFormat('MM/dd/yyyy').format(selectedDate!);
-                  setState(() {
-                    dateinput.text = formattedDate; //changes UI when user selects a date
+                    firstDate: DateTime(2000),
+                    // range of dates that calendar shows
+                    lastDate: DateTime(DateTime.now().year + 5),).then((pickedDate) {
+                    //then usually do the future job
+                    if (pickedDate == null) {
+                      //if user tap cancel then this function will stop
+                      return;
+                    }
+                    setState(() {
+                      //for rebuilding the ui
+                      // display new selected date
+                      formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+                      dateInput.text = formattedDate;
+                      // updated dateTime
+                      dateTime = DateTime(
+                          pickedDate.year, pickedDate.month, pickedDate.day,
+                          dateTime.hour, dateTime.minute);
+                    });
                   });
-                },
-            ),
+                }),
+            const SizedBox(height: 20,),
             // TextFormField for Location Selection
             SearchLocation(
               apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y', // Google Places API key
@@ -153,6 +194,7 @@ class _CreateEvent extends State<Event>{
               //   db_location = (place.geolocation) as String;
               // },
             ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -183,7 +225,7 @@ class _CreateEvent extends State<Event>{
                       decoration: InputDecoration(
                       hintText: "New Comment"),
                       onChanged: (String value){
-                        input_comment = value;
+                        input_comment += value;
                       },
                       ),
                       actions:[
@@ -218,13 +260,13 @@ class _CreateEvent extends State<Event>{
                     db_location = result as String;
                     //saving event data to database
                     Map<String, dynamic> dataToSave = {
-                      'Title': db_title,
-                      'Description': db_body,
-                      'Date': dateinput.text,
-                      'Location': db_location,
-                      'Repeat': check1,
-                      'Remind': check2,
-                      'Comments': input_comment
+                      'title': db_title,
+                      'description': db_body,
+                      'date': selectedDate,
+                      'location': db_location,
+                      'repeat': check1,
+                      'remind': check2,
+                      'comments': [input_comment]
                     };
 
                     // Add data to database
@@ -232,7 +274,7 @@ class _CreateEvent extends State<Event>{
                     // eList.add(Event(dateTime, "New"));
                     // db.add_note(body: body, title: title);
                     //Navigator.pop(Schedule());
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Schedule()));
+                    Navigator.of(context).pop();
                   },
                   // Create Event Button
                   child: const Text('Create')),
