@@ -25,8 +25,16 @@ class User_Database {
           .collection('Notes').snapshots();
     }
   }
-}
 
+  getEvents(){
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if(user != null){
+      return users.doc(user.uid).collection('Schedules').doc('Event').collection('Event').snapshots();
+    }
+  }
+}
 
 // Database Read Material
 class DisplaySchedule extends StatefulWidget {
@@ -60,6 +68,51 @@ class ReadSchedule extends State<DisplaySchedule> {
                   ExpansionTile (
                     title: Text(note.get('title')),
                     children: [Text(note.get('body'))],
+                  )
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class DisplayEvents extends StatefulWidget {
+  const DisplayEvents({Key? key}) : super(key: key);
+
+  @override
+  ReadEvents createState() => ReadEvents();
+}
+
+class ReadEvents extends State<DisplayEvents> {
+  @override
+  Widget build(BuildContext context) {
+    User_Database db = User_Database();
+
+    return Scaffold(
+      body: StreamBuilder(
+        stream: db.getEvents(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) {
+            return ListView();
+          }
+          return ListView(
+            children: snapshot.data!.docs.map((event) {
+              return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                  padding: const EdgeInsets.fromLTRB(20,30,20,30),
+                  alignment: Alignment.center,
+                  child:
+                  ExpansionTile (
+                    title: Text(event.get('Title') as String),
+                    children: [Text(event.get('Description') as String),
+                      Text(event.get("Date") as String),
+                      Text(event.get("Location") as String),
+                      Text(event.get("Comments") as String)
+                    ],
                   )
               );
             }).toList(),

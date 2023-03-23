@@ -1,11 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_meet/Notifications/Notification_Services.dart';
+import 'package:lets_meet/Profile/profile_screen.dart';
+import 'package:lets_meet/Scheduling/ItemChecklist.dart';
+import 'package:lets_meet/Scheduling/Weather/Weather.dart';
+import 'package:lets_meet/Settings/settings.dart';
 import '../Database/Schedule Database.dart';
 import '../Login/Auth.dart';
-import '../Login/Login.dart';
-import '../main.dart';
 import 'Schedule.dart';
 
 class Home extends StatefulWidget {
@@ -24,8 +26,6 @@ class _Home extends State<Home>{
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
-
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -41,8 +41,8 @@ class _Home extends State<Home>{
                   ),
                   onTap: () => FirebaseAuth.instance.signOut().then((res) {
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()),
-                      );
-                    },
+                    );
+                  },
                   ),
                 )
             )
@@ -61,9 +61,9 @@ class _Home extends State<Home>{
         onDestinationSelected: (index) => setState(() => this.index = index),
         destinations: const [
           NavigationDestination(
-              icon: Icon(Icons.punch_clock_outlined),
-              selectedIcon: Icon(Icons.punch_clock),
-              label: 'Upcoming'),
+              icon: Icon(Icons.checklist_outlined),
+              selectedIcon: Icon(Icons.checklist),
+              label: 'Checklist'),
           NavigationDestination(
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home),
@@ -76,9 +76,9 @@ class _Home extends State<Home>{
       ),
       body: <Widget> [
         Container(
-            color:  Colors.red,
-            alignment: Alignment.center,
-            child: const Text("Upcoming")
+          color:  Colors.red,
+          alignment: Alignment.center,
+          child: ItemChecklist(),
         ),
         Column(
             children: [
@@ -93,7 +93,7 @@ class _Home extends State<Home>{
                   border: Border.all(color: Colors.green),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text("Weather"),
+                child: const WeatherPage(),
               ),
               const SizedBox(
                 height: 20,
@@ -133,9 +133,9 @@ class _Home extends State<Home>{
             ]
         ),
         Container(
-            color:  Colors.blue,
-            alignment: Alignment.center,
-            child: const Text("Settings")
+          color:  Colors.blue,
+          alignment: Alignment.center,
+          child: SettingsPage(),
         ),
       ][index],
     );
