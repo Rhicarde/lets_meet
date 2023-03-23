@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         scaffoldMessengerKey: Utils.messengerKey,
         navigatorKey: navigatorKey,
         title: "Lets Plan",
-        home: Home()
+        home: MainPage()
   );
 }
 

@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:lets_meet/Scheduling/Event.dart';
 import '../Database/Schedule Database.dart';
 import '../Shared/constants.dart';
 
@@ -19,6 +20,9 @@ class EventDetail extends State<DisplayEventDetail> {
   final _titleTextController = TextEditingController();
   final _bodyTextController = TextEditingController();
   final _locationTextController = TextEditingController();
+  final _commentTextController = TextEditingController();
+
+  String _showComment = "";
 
   TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
@@ -51,6 +55,8 @@ class EventDetail extends State<DisplayEventDetail> {
     bool remind = widget.event.get('remind');
     bool repeat = widget.event.get('repeat');
 
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
 
     return Scaffold(
         appBar: AppBar(
@@ -145,10 +151,41 @@ class EventDetail extends State<DisplayEventDetail> {
             SingleChildScrollView(
               child: Column(
                 children: [
-                  for (var comment in widget.event.get('comments')) Text(comment)
-                ],
-              )
-            )
+                  for (var comment in widget.event.get('comments')) Text(comment),
+                  ElevatedButton(
+                      child: Text('Edit'),
+                   onPressed: () async {
+                        showDialog(context: context,
+                        builder: (BuildContext context){
+                        return AlertDialog(
+                          title: Text("Edit Comment"),
+                          content: TextField(
+                          decoration: InputDecoration(
+                          hintText: "New Comment"),
+                          onChanged: (String value){
+                          List _oldArray = [];
+                          _oldArray = widget.event.get('comments');
+                          _oldArray[0] = value;
+                          FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').doc('UqXeStlb1bCcDo53n6Ao').update({'comments': _oldArray});
+                           },
+                          ),
+                          actions: [
+                            ElevatedButton(onPressed: ()
+                        {
+                          Navigator.of(context).pop();
+                          }, child: Text("Add")
+                            )],
+                        );
+                       // DocumentReference doc_ref=FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').document();
+                       // DocumentSnapshot docSnap = await doc_ref.get();
+                       // var doc_id2 = docSnap.reference.documentID;
+                        // figure out how to get doc id
+
+                   },
+                 );
+                })]
+              ),
+            ),
           ],
         )
     );
