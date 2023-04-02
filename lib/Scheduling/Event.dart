@@ -65,6 +65,7 @@ class _CreateEvent extends State<Event>{
   String db_title = "";
   String db_body = "";
   String db_location = "";
+  String db_placeid = "";
   String event_comment = "";
   String input_comment = "";
   String cid = "";
@@ -214,12 +215,9 @@ class _CreateEvent extends State<Event>{
                 setState(() {
                   // display chosen address
                   db_location = (place.placeId) as String;
+                  db_placeid = (place.placeId);
                 });
               },
-              //   onSelected: (Place place) async {
-              //   //final geolocation = await place.geolocation; // variable to store selected place
-              //   db_location = (place.geolocation) as String;
-              // },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -293,7 +291,8 @@ class _CreateEvent extends State<Event>{
                       'location': db_location,
                       'repeat': check1,
                       'remind': check2,
-                      'comments': [input_comment]
+                      'comments': [input_comment],
+                      "placeid" : db_placeid
                     };
 
                     // Add data to database

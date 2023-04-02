@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_meet/Scheduling/OptimalDeparture.dart';
 
 import '../Scheduling/EventDetail.dart';
+//import '../Scheduling/OptimalDeparture.dart';
 import '../Scheduling/PlanDetail.dart';
 
 class User_Database {
@@ -231,7 +233,7 @@ class ReadEvents extends State<DisplayEvents> {
             children: snapshot.data!.docs.map((event) {
               return GestureDetector(
                 key: Key(event.get('title')),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: event))),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => OptimalDeparture(event: event))),
                 child: Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
