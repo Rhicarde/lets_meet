@@ -49,13 +49,47 @@ class EventDetail extends State<DisplayEventDetail> {
     bool remind = widget.event.get('remind');
     bool repeat = widget.event.get('repeat');
 
-
     return Scaffold(
         appBar: AppBar(
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             centerTitle: Theme.of(context).appBarTheme.centerTitle,
             title: Text(widget.event.get('title')),
+            leading: Builder(
+              builder: (BuildContext context) {
+                final ScaffoldState? scaffold = Scaffold.maybeOf(context);
+                final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+                final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
+                final bool canPop = parentRoute?.canPop ?? false;
+
+                if (hasEndDrawer && canPop) {
+                  return BackButton();
+                } else {
+                  return SizedBox.shrink();
+                }
+              },
+            ),
             actions: const <Widget>[]
+        ),
+        endDrawer: Drawer(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buildHeader(context),
+                for (String user in widget.event.get('userIds'))
+                  FutureBuilder(
+                    future: db.get_user_name(userId: user),
+                    builder: (BuildContext context, AsyncSnapshot<Object?> profile) {
+                      if (profile.hasData) {
+                        return ListTile(leading: const Icon(Icons.person_outline), title: Text('${profile.data}'),);
+                      }
+                      else {
+                        return const CircularProgressIndicator();
+                      }
+                    }),
+              ],
+            ),
+          ),
         ),
         body: Column(
           children: [
@@ -128,4 +162,20 @@ class EventDetail extends State<DisplayEventDetail> {
         )
     );
   }
+
+  Widget buildHeader(BuildContext context) => Container(
+    color: Colors.blue,
+    padding: EdgeInsets.only(
+      top: MediaQuery.of(context).padding.top,
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: const [
+        SizedBox(height: 12,),
+        Text('Invitees',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+        SizedBox(height: 12,),
+      ],
+    ),
+  );
 }

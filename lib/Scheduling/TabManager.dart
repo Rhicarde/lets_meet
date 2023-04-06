@@ -10,6 +10,7 @@ import 'Home.dart';
 class Pages extends StatefulWidget {
   const Pages({Key? key}) : super(key: key);
 
+  @override
   _Pages createState() => _Pages();
 }
 

@@ -5,6 +5,7 @@ import '../Login/Authentication/validator.dart';
 import 'package:lets_meet/Scheduling/Event.dart';
 import '../Shared/constants.dart';
 
+// Screen to add info on a new plan
 class Schedule extends StatefulWidget {
 
   final Function? toggleView;
@@ -14,13 +15,12 @@ class Schedule extends StatefulWidget {
 }
 
 class _CreateSchedule extends State<Schedule> {
+  // Controllers to manage date and time
   TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
 
   DateTime dateTime = DateTime.now();
-  DateTime date = DateTime.now().subtract(Duration(days: DateTime
-      .now()
-      .day - 1));
+  DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
 
   @override
   void initState() {
@@ -29,18 +29,22 @@ class _CreateSchedule extends State<Schedule> {
 
   String error = "";
 
+  // Controller to get text for title and description of plan
   final _titleTextController = TextEditingController();
   final _bodyTextController = TextEditingController();
 
+  // Boolean variables to determine notifications
   bool remind = false;
   bool repeat = false;
 
   Widget build(BuildContext context) {
+    // Database for the writes
     User_Database db = User_Database();
 
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');
 
+    // Date format
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
     dateInput.text = formattedDate;
     String formattedTime = '$hours:$minutes';
@@ -48,20 +52,15 @@ class _CreateSchedule extends State<Schedule> {
 
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Theme
-                .of(context)
-                .appBarTheme
-                .backgroundColor,
-            centerTitle: Theme
-                .of(context)
-                .appBarTheme
-                .centerTitle,
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+            centerTitle: Theme.of(context).appBarTheme.centerTitle,
             title: const Text('Lets Plan'),
             actions: const <Widget>[]
         ),
         body: ListView(
           children: [
             const SizedBox(height: 10,),
+            // Button used to navigate between creating a plan or an event
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -97,10 +96,12 @@ class _CreateSchedule extends State<Schedule> {
               ],
             ),
             const SizedBox(height: 20,),
+            // Text box for title of plan
             TextFormField(
               controller: _titleTextController,
               decoration: textInputDecoration.copyWith(hintText: 'Title'),
             ),
+            // Text box for description of plan
             TextFormField(
               controller: _bodyTextController,
               validator: (value) =>
@@ -109,6 +110,7 @@ class _CreateSchedule extends State<Schedule> {
                   ),
               decoration: textInputDecoration.copyWith(hintText: 'Description'),
             ),
+            // Text box for date - will show calendar
             TextFormField(
                 controller: dateInput,
                 decoration: const InputDecoration(
@@ -141,6 +143,7 @@ class _CreateSchedule extends State<Schedule> {
                     });
                   });
                 }),
+            // Text box for time - will show calendar
             TextFormField(
               controller: timeInput,
               decoration: const InputDecoration(
@@ -170,6 +173,7 @@ class _CreateSchedule extends State<Schedule> {
               },
             ),
             const SizedBox(height: 20,),
+            // Checkboxes to determine repeation or notification
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -191,6 +195,7 @@ class _CreateSchedule extends State<Schedule> {
                     }),
               ],
             ),
+            // Creation button -> leads to writing to database
             Container(
               child: ElevatedButton(
                   onPressed: () {

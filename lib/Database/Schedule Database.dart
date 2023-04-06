@@ -136,6 +136,80 @@ class User_Database {
           .doc(id).delete();
     }
   }
+
+  checkRequests() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null){
+      return users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Requests').collection('Requests').snapshots();
+    }
+  }
+
+  void add_request({required QueryDocumentSnapshot request}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+     users.doc(user.uid)
+         .collection('Schedules')
+         .doc('Event').collection('InvitedEvents').add({'userId': request.get('userId'), 'eventId': request.get('eventId'), 'eventDate': request.get('eventDate')});
+
+      update_event_invitation(userId: request.get('userId'), eventId: request.get('eventId'));
+      remove_request(id: request.id);
+    }
+  }
+
+  void remove_request({required String id}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Requests').collection('Requests')
+          .doc(id).delete();
+    }
+  }
+
+  Future<void> update_event_invitation({required String userId, required String eventId}) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      DocumentSnapshot<Map<String, dynamic>> qSnapshot = await users.doc(userId)
+          .collection('Schedules').doc('Event').collection('Event').doc(eventId).get();
+
+      List<dynamic> usersList = qSnapshot.get('userIds');
+
+      if (usersList[0] == "") {
+        usersList[0] = user.uid;
+      }
+      else {
+        usersList.add(user.uid);
+      }
+
+      users.doc(userId)
+          .collection('Schedules').doc('Event').collection('Event').doc(eventId).update({'userIds': usersList});
+    }
+  }
+
+  get_user_name({required String userId}) async {
+    QuerySnapshot<Map<String, dynamic>> qSnapshot = await users.doc(userId).collection('Profile').get();
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> listSnapshot = qSnapshot.docs;
+
+    Map<String, dynamic>? data = listSnapshot[0].data();
+
+    return data["name"];
+  }
+
+  get_event_name({required String userId, required String eventId}) async {
+    DocumentSnapshot<Map<String, dynamic>> qSnapshot = await users.doc(userId).collection('Schedules').doc('Event').collection('Event').doc(eventId).get();
+
+    return qSnapshot.get('title');
+  }
 }
 
 // Database Read Material
@@ -230,13 +304,13 @@ class ReadEvents extends State<DisplayEvents> {
           return ListView(
             children: snapshot.data!.docs.map((event) {
               return GestureDetector(
-                key: Key(event.get('Title')),
+                key: Key(event.get('title')),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: event))),
                 child: Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     child:ListTile(
-                      title: Text(event.get('Title')),
+                      title: Text(event.get('title')),
                       // Delete Event Button
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_forever_rounded, color: Colors.red,),

@@ -10,6 +10,7 @@ import '../Database/Schedule Database.dart';
 import '../Login/Auth.dart';
 import '../Login/Login.dart';
 import '../main.dart';
+import 'RequestMenu.dart';
 import 'Schedule.dart';
 
 // The main home screen that the user see's when logging on
@@ -24,6 +25,7 @@ class _Home extends State<Home>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Top bar that has Sign Out button
       appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
@@ -45,6 +47,9 @@ class _Home extends State<Home>{
             )
           ]
       ),
+      // A side bar menu that allows user to view all incoming requests
+      drawer: RequestMenu(),
+      // Floating Action Button is used to add a new plan/event
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
@@ -52,6 +57,7 @@ class _Home extends State<Home>{
                 MaterialPageRoute(builder: (context) => Schedule()));
           }
       ),
+      // Contains weather, text, schedule, and events in a column
       body: Column(
             children: [
               const SizedBox(
@@ -102,8 +108,10 @@ class _Home extends State<Home>{
                   ]
               ),
               Expanded(child: DisplaySchedule(),),
+              const SizedBox(height: 20),
               const Center(
                   child: Text("Events", style: TextStyle(fontWeight: FontWeight.bold))),
+              const SizedBox(height: 20),
               Expanded(child: DisplayEvents(),),
             ]
         ),

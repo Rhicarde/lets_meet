@@ -262,11 +262,12 @@ class _CreateEvent extends State<Event>{
                     Map<String, dynamic> dataToSave = {
                       'title': db_title,
                       'description': db_body,
-                      'date': selectedDate,
+                      'date': dateTime,
                       'location': db_location,
                       'repeat': check1,
                       'remind': check2,
-                      'comments': [input_comment]
+                      'comments': [input_comment],
+                      'userIds': []
                     };
 
                     // Add data to database
