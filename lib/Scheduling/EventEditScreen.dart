@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_meet/Scheduling/Event.dart';
+import 'package:lets_meet/Scheduling/EventDetail.dart';
 import '../Database/Schedule Database.dart';
 import '../Shared/constants.dart';
 
@@ -33,6 +34,7 @@ class EventEdit extends State<DisplayEventEdit> {
     _bodyTextController.text = widget.event.get('description');
     _locationTextController.text = widget.event.get('location');
     timeInput.text = widget.event.get('time');
+    _commentTextController.text = widget.event.get('comments').join('\n');
 
     // Get Timestamp from Firebase and Convert to DateTime
     DateTime dateTime = widget.event.get('date').toDate();
@@ -78,6 +80,7 @@ class EventEdit extends State<DisplayEventEdit> {
             controller: _locationTextController,
             decoration: textInputDecoration.copyWith(hintText: 'Location'),
             style: TextStyle(fontSize: 18),
+              readOnly: true,
             ),
             TextFormField(
             controller: timeInput,
@@ -97,6 +100,7 @@ class EventEdit extends State<DisplayEventEdit> {
 
             setState(() {
             time = newTime;
+            timeInput.text = newTime.format(context);
             });
             }
             ),
@@ -124,7 +128,46 @@ class EventEdit extends State<DisplayEventEdit> {
             });
             }
             ),
-            ]
-            )
-                )
-          );}}
+            TextFormField(
+              controller: _commentTextController,
+              decoration: textInputDecoration.copyWith(hintText: 'Comments'),
+              style: TextStyle(fontSize: 18),
+              maxLines: null,
+            ),
+            ElevatedButton(
+              onPressed: () {
+
+                // Get the edited field values from the controllers
+                String title = _titleTextController.text;
+                String description = _bodyTextController.text;
+                String location = _locationTextController.text;
+                String time = timeInput.text;
+                List<String> comments = _commentTextController.text.split('\n').toList();
+
+                // Update the document in the Firestore database
+                FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').doc(widget.event.id).update({
+                  'title': title,
+                  'description': description,
+                  'location': location,
+                  'time': time,
+                  'comments': comments,
+                });
+
+                // Update the screen with the new field values
+                setState(() {
+                  widget.event.get('comments')['title'] = title;
+                  widget.event.get('description')['description'] = description;
+                  widget.event.get('location')['location'] = location;
+                  widget.event.get('time')['time'] = time;
+                  widget.event.get('comments')['comments'] = comments;
+                });
+
+              },
+              child: Text('Submit'),
+            ),
+          ],
+        )
+        )
+    );
+
+          }}
