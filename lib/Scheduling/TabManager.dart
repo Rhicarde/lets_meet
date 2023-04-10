@@ -19,7 +19,7 @@ class _Pages extends State<Pages>{
   int _selectedIndex = 1;
 
   // Possible Screens to swap between
-  List<Widget> pages = [
+  List<Widget> pages = const [
     ShowNotification(),
     Home(),
     ProfileScreen(),
