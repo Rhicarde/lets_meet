@@ -28,14 +28,18 @@ class _CreateEvent extends State<Event>{
   // Variable Declarations
   // late CalendarFormat _calendarFormat = CalendarFormat.month;
   late DateTime dateTime = DateTime.now();
+  late DateTime _focusedDay = DateTime.now();
+  late DateTime _selectedDay = _focusedDay;
   DateTime currentDate = DateTime.now();
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+  TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
 
 
   // Getters
   get db => null;
   get hours => null;
   get minutes => null;
+
 
 
   // Event List Declaration
@@ -63,6 +67,7 @@ class _CreateEvent extends State<Event>{
   String event_comment = "";
   String input_comment = "";
   String cid = "";
+  String db_time = "";
   //final DateTime date;
   //final String state;
   Color color = Colors.blue;
@@ -176,6 +181,27 @@ class _CreateEvent extends State<Event>{
                   });
                 }),
             const SizedBox(height: 20,),
+
+
+            // Time Display
+            // Time Selector Button
+            ElevatedButton(
+                child: Text('${time.hour}:${time.minute}'),
+                onPressed: () async {
+                  TimeOfDay? newTime = await showTimePicker(
+                      context: context,
+                      initialTime: time);
+
+                  // Cancel return NUll
+                  if (newTime == null) return;
+
+                  // OK return TimeofDay
+                  setState(() {
+                    time = newTime;
+                  });
+                  db_time = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+                }),
             // TextFormField for Location Selection
             SearchLocation(
               apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y', // Google Places API key
@@ -215,36 +241,36 @@ class _CreateEvent extends State<Event>{
             ),
             Container(
               // Button to add Event Comments
-                child: ElevatedButton(
-                    onPressed: (){
-                      showDialog(context: context,
-                          builder: (BuildContext context){
-                            return AlertDialog(
-                                title: Text("Add Comment"),
-                                content: TextField(
-                                  decoration: InputDecoration(
-                                      hintText: "New Comment"),
-                                  onChanged: (String value){
-                                    input_comment += value;
+              child: ElevatedButton(
+                onPressed: (){
+                  showDialog(context: context,
+                  builder: (BuildContext context){
+                    return AlertDialog(
+                    title: Text("Add Comment"),
+                    content: TextField(
+                      decoration: InputDecoration(
+                      hintText: "New Comment"),
+                      onChanged: (String value){
+                        input_comment += value;
+                      },
+                      ),
+                      actions:[
+                        ElevatedButton(onPressed: () async{
+                          Map<String, dynamic> eventCommentSave = {
+                            "Comment" : input_comment
+                      };
+                      await FirebaseFirestore.instance.collection("Users").doc(user?.uid).collection('Schedules').doc("Event").collection("Comments").add(eventCommentSave).then((DocumentReference doc){
+                      cid = doc.id; // document id of newly created note
+                      });
+                      Navigator.of(context).pop();
+                      },
+                      child: Text("Add"))
+                      ]
+                      );
+                      });
                                   },
-                                ),
-                                actions:[
-                                  ElevatedButton(onPressed: () async{
-                                    Map<String, dynamic> eventCommentSave = {
-                                      "Comment" : input_comment
-                                    };
-                                    await FirebaseFirestore.instance.collection("Users").doc(user?.uid).collection('Schedules').doc("Event").collection("Comments").add(eventCommentSave).then((DocumentReference doc){
-                                      cid = doc.id; // document id of newly created note
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                      child: Text("Add"))
-                                ]
-                            );
-                          });
-                    },
-                    child: const Text("Add Comment")
-                )
+                                  child: const Text("Add Comment")
+              )
             ),
 
             Container(
@@ -253,7 +279,7 @@ class _CreateEvent extends State<Event>{
                   onPressed: ()  async {
                     // Converting Place Id to Address to Store in Database
                     final geocoding = GoogleMapsGeocoding(
-                        apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y'
+                      apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y'
                     );
                     final response = await geocoding.searchByPlaceId(db_location);
                     final result = response.results[0].formattedAddress;
@@ -263,6 +289,7 @@ class _CreateEvent extends State<Event>{
                       'title': db_title,
                       'description': db_body,
                       'date': dateTime,
+                      'time': db_time,
                       'location': db_location,
                       'repeat': check1,
                       'remind': check2,
