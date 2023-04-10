@@ -203,7 +203,7 @@ class _CreateEvent extends State<Event>{
                     value: check1,
                     onChanged: (bool? value) {setState(() {
                       check1 = value!;
-                      });
+                    });
                     }),
                 Text("Remind"),
                 Checkbox(
@@ -215,36 +215,36 @@ class _CreateEvent extends State<Event>{
             ),
             Container(
               // Button to add Event Comments
-              child: ElevatedButton(
-                onPressed: (){
-                  showDialog(context: context,
-                  builder: (BuildContext context){
-                    return AlertDialog(
-                    title: Text("Add Comment"),
-                    content: TextField(
-                      decoration: InputDecoration(
-                      hintText: "New Comment"),
-                      onChanged: (String value){
-                        input_comment += value;
-                      },
-                      ),
-                      actions:[
-                        ElevatedButton(onPressed: () async{
-                          Map<String, dynamic> eventCommentSave = {
-                            "Comment" : input_comment
-                      };
-                      await FirebaseFirestore.instance.collection("Users").doc(user?.uid).collection('Schedules').doc("Event").collection("Comments").add(eventCommentSave).then((DocumentReference doc){
-                      cid = doc.id; // document id of newly created note
-                      });
-                      Navigator.of(context).pop();
-                      },
-                      child: Text("Add"))
-                      ]
-                      );
-                      });
+                child: ElevatedButton(
+                    onPressed: (){
+                      showDialog(context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                                title: Text("Add Comment"),
+                                content: TextField(
+                                  decoration: InputDecoration(
+                                      hintText: "New Comment"),
+                                  onChanged: (String value){
+                                    input_comment += value;
                                   },
-                                  child: const Text("Add Comment")
-              )
+                                ),
+                                actions:[
+                                  ElevatedButton(onPressed: () async{
+                                    Map<String, dynamic> eventCommentSave = {
+                                      "Comment" : input_comment
+                                    };
+                                    await FirebaseFirestore.instance.collection("Users").doc(user?.uid).collection('Schedules').doc("Event").collection("Comments").add(eventCommentSave).then((DocumentReference doc){
+                                      cid = doc.id; // document id of newly created note
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                      child: Text("Add"))
+                                ]
+                            );
+                          });
+                    },
+                    child: const Text("Add Comment")
+                )
             ),
 
             Container(
@@ -253,7 +253,7 @@ class _CreateEvent extends State<Event>{
                   onPressed: ()  async {
                     // Converting Place Id to Address to Store in Database
                     final geocoding = GoogleMapsGeocoding(
-                      apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y'
+                        apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y'
                     );
                     final response = await geocoding.searchByPlaceId(db_location);
                     final result = response.results[0].formattedAddress;
@@ -286,7 +286,7 @@ class _CreateEvent extends State<Event>{
   }
 
 
-Future<TimeOfDay?> pickTime() => showTimePicker(
-    context: context,
-    initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute));
+  Future<TimeOfDay?> pickTime() => showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute));
 }

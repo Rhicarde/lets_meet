@@ -41,7 +41,7 @@ class User_Database {
       }
       words.removeAt(0);
     }
-    
+
     return titleSearchList;
   }
 
