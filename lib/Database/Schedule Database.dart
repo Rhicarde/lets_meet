@@ -2,14 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_meet/Scheduling/Home.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../Notifications/Notification_History.dart';
+import '../Scheduling/Event.dart';
 import '../Scheduling/EventDetail.dart';
 import '../Scheduling/PlanDetail.dart';
 
 class User_Database {
   //users in the database
   final CollectionReference users = FirebaseFirestore.instance.collection('Users');
+
+  // Kieran King
+  // Given a day and time, finds the beginning of the following day
+  DateTime getBeginningOfNextDay(DateTime inputDate) {
+    print(DateUtils.dateOnly(inputDate).add(const Duration(days: 1)).toString());
+    return DateUtils.dateOnly(inputDate).add(const Duration(days: 1));
+  }
 
   // Write to database - Notes are the plans created by the users
   // Contains: title, body, time, reminder, and repeat
@@ -28,7 +38,7 @@ class User_Database {
           // .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
           .collection('Schedules')
           .doc('Plan').collection('Plans')
-          .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title)});
+          .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
     }
   }
 
@@ -50,7 +60,7 @@ class User_Database {
       }
       words.removeAt(0);
     }
-    
+
     return titleSearchList;
   }
 
@@ -121,15 +131,20 @@ class User_Database {
           .doc(id).update({'completed': completion});
     }
   }
-  // Read from Database - Displays all user notes on home page
-  getNotes() {
+
+  // Started by Richard Huynh, but worked on by Kieran King
+  // Read from Database - Displays all user plans on home page
+  getNotes(DateTime planTime) {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
     if (user != null){
       return users.doc(user.uid)
           .collection('Schedules')
-          .doc('Plan').collection('Plans').snapshots();
+          .doc('Plan').collection('Plans')
+          .where('time', isGreaterThanOrEqualTo: planTime)
+          .where('time', isLessThan: getBeginningOfNextDay(planTime))
+          .snapshots();
     }
   }
 
@@ -169,7 +184,14 @@ class User_Database {
     }
   }
 
-  getEvents(){
+  // Kieran King
+  // Creates a list of all app users' ids
+  getAllUsers() {
+    return FirebaseFirestore.instance
+        .collection("Users")
+        .snapshots();
+  }
+  get_upcoming_Events(){
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
@@ -177,6 +199,49 @@ class User_Database {
       return users.doc(user.uid).collection('Schedules').doc('Event').collection('Event').snapshots();
     }
   }
+
+  // Kieran King
+  // Queries and returns a stream of events for a specific given day for the user
+  getEvents(DateTime eventDate){
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if(user != null){
+      return users.doc(user.uid).collection('Schedules').doc('Event').collection('Event')
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(eventDate))
+          .where('date', isLessThan: Timestamp.fromDate(getBeginningOfNextDay(eventDate)))
+          .snapshots();
+      //final invitedEvents = users.doc(user.uid).collection('Schedules').doc('Event').
+    }
+  }
+  // Kieran King
+  // Creates a document with the given event id and the owner of the event's
+  // user ID for easy invitation implementation in the future
+  void addEventuser({required String eventId, required String userId, required Timestamp eventDate}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    // If their is a user currently logged in, add a new document for an
+    // event the user was invited to
+    if (user != null) {
+      users.doc(userId)
+          .collection('Schedules')
+          .doc('Requests')
+          .collection('Requests')
+          .add({'eventId': eventId, 'userId': user.uid, 'eventDate': eventDate});
+    }
+  }
+
+  // getAllInvitedEvents() {
+  //   FirebaseAuth auth = FirebaseAuth.instance;
+  //   User? user = auth.currentUser;
+  //
+  //   if(user != null){
+  //     final invitedEvents = users.doc(user.uid).collection('Schedules').doc('Event').collection('InvitedEvents')
+  //         .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(eventDate))
+  //         .where('date', isLessThan: Timestamp.fromDate(getBeginningOfNextDay(eventDate)))
+  //         .snapshots();}
+  // }
 
   void remove_event({required String id}) {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -366,7 +431,8 @@ class ReadSearch extends State<DisplaySearch> {
 
 // Database Read Material
 class DisplaySchedule extends StatefulWidget {
-  const DisplaySchedule({Key? key}) : super(key: key);
+  final DateTime viewedDate;
+  const DisplaySchedule(DateTime this.viewedDate, {Key? key}) : super(key: key);
 
   @override
   ReadSchedule createState() => ReadSchedule();
@@ -379,7 +445,7 @@ class ReadSchedule extends State<DisplaySchedule> {
 
     return Scaffold(
       body: StreamBuilder(
-        stream: db.getNotes(),
+        stream: db.getNotes(widget.viewedDate),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return ListView();
@@ -450,7 +516,7 @@ class ReadNotificationHistory_ extends State<DisplayNotificationHistory_> {
 
     return Scaffold(
       body: StreamBuilder(
-        stream: db.getEvents(), //getting events from the database
+        stream: db.get_upcoming_Events(), //getting events from the database
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return ListView();
@@ -482,20 +548,23 @@ class ReadNotificationHistory_ extends State<DisplayNotificationHistory_> {
 
 
 class DisplayEvents extends StatefulWidget {
-  const DisplayEvents({Key? key}) : super(key: key);
+  final DateTime viewedDate;
+  const DisplayEvents(DateTime this.viewedDate, {Key? key}) : super(key: key);
 
   @override
   ReadEvents createState() => ReadEvents();
 }
 
 class ReadEvents extends State<DisplayEvents> {
+
   @override
   Widget build(BuildContext context) {
+
     User_Database db = User_Database();
 
     return Scaffold(
       body: StreamBuilder(
-        stream: db.getEvents(),
+        stream: db.getEvents(widget.viewedDate),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return ListView();

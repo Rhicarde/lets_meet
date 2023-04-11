@@ -22,6 +22,26 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home>{
+  // bool areDatesEqual(DateTime date1, DateTime date2) {
+  //   if(date1.day == date2.day && date1.month == date2.month && date1.year == date2.year) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
+
+  DateTime viewedDate = DateUtils.dateOnly(DateTime.now());
+
+  // Kieran King
+  // Increases the currently viewed date on the home page by 1
+  void viewNextDay() {
+    viewedDate = viewedDate.add(const Duration(days: 1));
+  }
+  // Kieran King
+  // Decreases the currently viewed date on the home page by 1
+  void viewPreviousDay() {
+    viewedDate = viewedDate.subtract(const Duration(days: 1));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,12 +127,63 @@ class _Home extends State<Home>{
                     ),
                   ]
               ),
-              Expanded(child: DisplaySchedule(),),
+              Expanded(child: DisplaySchedule(viewedDate),),
               const SizedBox(height: 20),
               const Center(
                   child: Text("Events", style: TextStyle(fontWeight: FontWeight.bold))),
               const SizedBox(height: 20),
-              Expanded(child: DisplayEvents(),),
+              Expanded(child: DisplayEvents(viewedDate),),
+
+              // Kieran King
+              // Creates a row of buttons which each change the day in different ways,
+              // and automatically displays the events for the new day when changed
+              ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: [
+                  // Back arrow that decreases the day by 1
+                  IconButton(
+                      onPressed: () {
+                        setState(() {
+                          viewPreviousDay();
+                        });
+                        },
+                      icon: Icon(Icons.arrow_left),
+                    color: Colors.black,
+                    iconSize: 50,
+                  ),
+                  // Calendar button that allows the user to select any date to observe the user's
+                  // events on that specific day
+                  IconButton(
+                    onPressed: () async
+                    {
+                      // Creates the date picker dialog box
+                      DateTime? newDate = await showDatePicker(
+                          context: context,
+                          initialDate: viewedDate,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime(2100)
+                      );
+                      if (newDate == null) return;
+                      setState(() => viewedDate = DateUtils.dateOnly(newDate));
+                    },
+                    icon: Icon(Icons.calendar_month),
+                    color: Colors.black,
+                    iconSize: 50,
+                  ),
+                  // Forward arrow that increases the day by 1
+                  IconButton(
+                    onPressed: ()
+                    {
+                      setState(() {
+                        viewNextDay();
+                      });
+                    },
+                    icon: Icon(Icons.arrow_right),
+                    color: Colors.black,
+                    iconSize: 50,
+                  ),
+                ]
+              )
             ]
         ),
     );

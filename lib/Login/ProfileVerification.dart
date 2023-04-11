@@ -76,7 +76,7 @@ class _ProfileVerificationState extends State<ProfileVerification> {
   // Else, display email verification screen
   @override
   Widget build(BuildContext context) => _isEmailVerified
-          ? const Pages()
+          ? Pages()
           : Scaffold(
               appBar: AppBar(
                 title: const Text('Verify Email'),
