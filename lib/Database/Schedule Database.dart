@@ -3,11 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../Notifications/Notification_History.dart';
 import '../Scheduling/EventDetail.dart';
 import '../Scheduling/PlanDetail.dart';
 
 class User_Database {
+  //users in the database
   final CollectionReference users = FirebaseFirestore.instance.collection('Users');
+
+  // Write to database - Notes are the plans created by the users
+  // Contains: title, body, time, reminder, and repeat
+  get query => null;
 
   // Write to database - Notes are the plans created by the users
   // Contains: title, body, time, reminder, and repeat
@@ -17,9 +23,12 @@ class User_Database {
 
     if (user != null){
       users.doc(user.uid)
+          // .collection('Schedules')
+          // .doc('Plan').collection('Plans')
+          // .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
           .collection('Schedules')
           .doc('Plan').collection('Plans')
-          .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
+          .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title)});
     }
   }
 
@@ -58,6 +67,48 @@ class User_Database {
 
     return word;
   }
+
+  //getting the titles based on the search query of the user
+  getSearch({required String query}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+    query = query.toLowerCase();
+    if (user != null) {
+      return users.doc(user.uid)
+          .collection('Notes')
+          .where("titleSearch", arrayContains: query).snapshots(); //making sure that the title contains what is searched
+      }
+    }
+
+
+    // getDate(){
+    //   FirebaseAuth auth = FirebaseAuth.instance;
+    //   User? user = auth.currentUser;
+    //   if (user != null) {
+    //     return users.doc(user.uid)
+    //         .collection('Schedules').doc("Event").collection("Event").snapshots();
+    //     }
+    //   StreamBuilder<QuerySnapshot>(
+    //     stream: getDate(),
+    //     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    //       if (snapshot.hasError) {
+    //         return Text('Error: ${snapshot.error}');
+    //       }
+    //       switch (snapshot.connectionState) {
+    //         case ConnectionState.waiting:
+    //           return const Text('Loading...');
+    //         default:
+    //           if (!snapshot.hasData) {
+    //             return const Text('No data');
+    //           }
+    //           QueryDocumentSnapshot event = snapshot.data!.docs[0]; // assuming there is only one document in the collection
+    //           DateTime date = event.get('date').toDate();
+    //           return Text('$date');
+    //       }
+    //     },
+    //   );
+    //
+    // }
 
   complete_plan({required String id, required bool completion}){
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -100,6 +151,8 @@ class User_Database {
     User? user = auth.currentUser;
 
     if (user != null){
+      users.add(user.uid);
+
       users.doc(user.uid)
           .collection('Profile').add({'name': name, 'email': email});
     }
@@ -210,6 +263,105 @@ class User_Database {
 
     return qSnapshot.get('title');
   }
+
+  getDate(){
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+    if (user != null) {
+      return users.doc(user.uid)
+          .collection('Schedules').doc("Event").collection("Event").snapshots();
+    }
+  }
+}
+
+
+//read date
+// class DisplayDate extends StatefulWidget {
+//   const DisplayDate({Key? key}) : super(key: key);
+//
+//   @override
+//   ReadDate createState() => ReadDate();
+// }
+//
+// class ReadDate extends State<DisplayDate> {
+//   @override
+//   Widget build(BuildContext context) {
+//     User_Database db = User_Database();
+//
+//     return Scaffold(
+//       body: StreamBuilder(
+//         stream: db.getDate(),
+//         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//           if (!snapshot.hasData) {
+//             return ListView();
+//           }
+//           return ListView(
+//             children: snapshot.data!.docs.map((schedules) {
+//               return Container(
+//                   decoration: const BoxDecoration(
+//                     color: Colors.blue,
+//                   ),
+//                   padding: const EdgeInsets.fromLTRB(20,30,20,30),
+//                   alignment: Alignment.center,
+//                   child:
+//                   ExpansionTile (
+//                     title: Text(schedules.get('title')),
+//                     children: [Text(schedules.get('date'))],
+//                   )
+//               );
+//             }).toList(),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
+
+
+class DisplaySearch extends StatefulWidget {
+  //creating the key for the display search
+  final String query;
+  const DisplaySearch({Key? key, required this.query}) : super(key: key);
+
+  @override
+  ReadSearch createState() => ReadSearch();
+}
+
+class ReadSearch extends State<DisplaySearch> {
+  //this is where you read the search
+  @override
+  Widget build(BuildContext context) {
+    User_Database db = User_Database();
+
+    //the search will return a list of found searches and if nothing found, then nothing is displayed
+    return Scaffold(
+        body: StreamBuilder(
+          stream: db.getSearch(query:widget.query), //getting the search from database
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData) {
+              return ListView(); //returning the list view of the searches
+            }
+            return ListView(
+              children: snapshot.data!.docs.map((search) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                  padding: const EdgeInsets.fromLTRB(20,30,20,30),
+                  alignment: Alignment.center,
+                  child:
+                  ExpansionTile (
+                    title: Text(search.get('title') as String), //getting the String title
+               // onTap: () => Navigator.pop(context)
+              //children: [Text(note.get('body') as String)],
+            )
+        );
+      }).toList(),
+    );
+    },
+        ),
+    );
+  }
 }
 
 // Database Read Material
@@ -281,6 +433,53 @@ class ReadSchedule extends State<DisplaySchedule> {
     );
   }
 }
+
+//creating the class to display the notification history
+class DisplayNotificationHistory_ extends StatefulWidget {
+  const DisplayNotificationHistory_({Key? key}) : super(key: key);
+
+  @override
+  ReadNotificationHistory_ createState() => ReadNotificationHistory_();
+}
+
+//creating the class to read the notification history
+class ReadNotificationHistory_ extends State<DisplayNotificationHistory_> {
+  @override
+  Widget build(BuildContext context) {
+    User_Database db = User_Database(); //connecting to the user database
+
+    return Scaffold(
+      body: StreamBuilder(
+        stream: db.getEvents(), //getting events from the database
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) {
+            return ListView();
+          }
+          return ListView( //returning the information that is needed to display the notification history
+            children: snapshot.data!.docs.map((event) {
+              return GestureDetector(
+                key: Key(event.get('title')), //getting the event name and information from events
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotificationHistory(event: event))),
+                child: Card(
+                    elevation: 100,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+                    color:Colors.blue,
+                    child:ListTile(
+                      title: Text(event.get('title'),
+                      style: const TextStyle(
+                          color: Colors.amberAccent,
+                          fontSize: 25)),
+                    )
+                ),
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+}
+
 
 class DisplayEvents extends StatefulWidget {
   const DisplayEvents({Key? key}) : super(key: key);

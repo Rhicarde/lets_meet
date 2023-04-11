@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:lets_meet/Profile/profile_screen.dart';
 
+import '../Database/Schedule Database.dart';
+import '../Notifications/Notification_History.dart';
 import '../Notifications/Notification_Services.dart';
 import 'Home.dart';
 
@@ -20,7 +22,7 @@ class _Pages extends State<Pages>{
 
   // Possible Screens to swap between
   List<Widget> pages = const [
-    ShowNotification(),
+    DisplayNotificationHistory_(),
     Home(),
     ProfileScreen(),
   ];
