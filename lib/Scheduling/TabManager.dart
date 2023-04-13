@@ -1,12 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:lets_meet/Notifications/DisplayUpcoming.dart';
 import 'package:lets_meet/Profile/profile_screen.dart';
-
-import '../Database/Schedule Database.dart';
-import '../Notifications/Notification_History.dart';
-import '../Notifications/Notification_Services.dart';
-import 'Home.dart';
+import '../Home/Home.dart';
 
 // Tab Manager manages the indexing and swapping between screens on the navigation bar
 class Pages extends StatefulWidget {
@@ -22,7 +19,7 @@ class _Pages extends State<Pages>{
 
   // Possible Screens to swap between
   List<Widget> pages = const [
-    DisplayNotificationHistory_(),
+    DisplayUpcoming(),
     Home(),
     ProfileScreen(),
     // Verification(),

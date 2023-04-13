@@ -3,10 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../Database/Schedule Database.dart';
+import '../../Database/Schedule Database.dart';
 
-import '../Database/Schedule Database.dart';
-import '../Shared/constants.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Shared/constants.dart';
 
 
 // The Event Invitation Page

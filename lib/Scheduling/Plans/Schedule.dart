@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../Database/Schedule Database.dart';
-import '../Login/Authentication/validator.dart';
-import 'package:lets_meet/Scheduling/Event.dart';
-import '../Shared/constants.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Login/Authentication/validator.dart';
+import 'package:lets_meet/Scheduling/Events/Event.dart';
+import '../../Shared/constants.dart';
 
 // Screen to add info on a new plan
 class Schedule extends StatefulWidget {
@@ -15,12 +15,16 @@ class Schedule extends StatefulWidget {
 }
 
 class _CreateSchedule extends State<Schedule> {
+  // Controller to get text for title and description of plan
+  final _titleTextController = TextEditingController();
+  final _bodyTextController = TextEditingController();
   // Controllers to manage date and time
   TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
 
   DateTime dateTime = DateTime.now();
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+  TimeOfDay current_time = TimeOfDay.now();
 
   @override
   void initState() {
@@ -28,10 +32,6 @@ class _CreateSchedule extends State<Schedule> {
   }
 
   String error = "";
-
-  // Controller to get text for title and description of plan
-  final _titleTextController = TextEditingController();
-  final _bodyTextController = TextEditingController();
 
   // Boolean variables to determine notifications
   bool remind = false;
@@ -41,13 +41,11 @@ class _CreateSchedule extends State<Schedule> {
     // Database for the writes
     User_Database db = User_Database();
 
-    final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
-    final minutes = dateTime.minute.toString().padLeft(2, '0');
-
     // Date format
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
     dateInput.text = formattedDate;
-    String formattedTime = '$hours:$minutes';
+    // Time format
+    String formattedTime = current_time.format(context);
     timeInput.text = formattedTime;
 
     return Scaffold(
@@ -154,21 +152,16 @@ class _CreateSchedule extends State<Schedule> {
               onTap: () async {
                 final time = await showTimePicker(
                     context: context,
-                    initialTime: TimeOfDay(hour: DateTime
-                        .now()
-                        .hour, minute: DateTime
-                        .now()
-                        .minute));
+                    initialTime: TimeOfDay(hour: current_time.hour, minute: current_time.minute));
                 if (time == null) return;
                 setState(() {
                   //for rebuilding the ui
-                  // display new selected time
-                  String formattedTime = '$hours:$minutes';
-                  timeInput.text = formattedTime;
+                  // display new selected time;
+                  timeInput.text = time.format(context);
+                  current_time = time;
                   // updated time
                   dateTime = DateTime(
-                      dateTime.year, dateTime.month, dateTime.day, time.hour,
-                      time.minute);
+                      dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
                 });
               },
             ),

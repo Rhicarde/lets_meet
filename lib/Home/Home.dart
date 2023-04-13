@@ -1,22 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_meet/Login/ProfileVerification.dart';
-import 'package:lets_meet/Notifications/Notification_Services.dart';
-import 'package:lets_meet/Profile/profile_screen.dart';
-import 'package:lets_meet/Scheduling/Notes.dart';
 import 'package:lets_meet/Scheduling/Weather/Weather.dart';
-import '../Database/Schedule Database.dart';
-import '../Login/Auth.dart';
-import '../Login/Login.dart';
-import '../Search/Search.dart';
-import '../main.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Login/Auth.dart';
+import '../../Search/Search.dart';
+import '../Scheduling/Events/DisplayEvents.dart';
+import '../Scheduling/Plans/DisplaySchedule.dart';
+import '../Scheduling/Plans/Schedule.dart';
 import 'RequestMenu.dart';
-import 'Schedule.dart';
-import 'TabManager.dart';
 
 // The main home screen that the user see's when logging on
 // Displays weather, date, schedule, and event made for given day
@@ -186,7 +181,7 @@ class _Home extends State<Home>{
 
                                                   Navigator.of(context).pop();
                                                 },
-                                                child: const Text("Ok")),
+                                                child: const Text("Compare")),
                                           ],
                                         );
                                       }

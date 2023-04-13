@@ -1,10 +1,7 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-
-import '../Scheduling/Home.dart';
 import '../Scheduling/TabManager.dart';
 import 'Authentication/fire_auth.dart';
 

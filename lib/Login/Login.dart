@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_meet/Login/Authentication/validator.dart';
-import '../Scheduling/Home.dart';
+import '../Home/Home.dart';
 import 'Authentication/fire_auth.dart';
 import 'ForgotPassword.dart';
 
