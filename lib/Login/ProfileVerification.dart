@@ -76,6 +76,7 @@ class _ProfileVerificationState extends State<ProfileVerification> {
   Widget build(BuildContext context) => _isEmailVerified
           ? Pages()
           : Scaffold(
+              resizeToAvoidBottomInset: false,
               appBar: AppBar(
                 title: const Text('Verify Email'),
               ),

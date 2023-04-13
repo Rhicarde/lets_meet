@@ -28,6 +28,7 @@ class _Pages extends State<Pages>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       // Bottom Navigation Bar used for selecting the pages
       bottomNavigationBar: Container(
         color: Theme.of(context).canvasColor,

@@ -136,6 +136,14 @@ class EventDetail extends State<DisplayEventDetail> {
               style: TextStyle(fontSize: 18),
             ),
             TextFormField(
+                readOnly: true,
+                controller: dateInput,
+                decoration: const InputDecoration(
+                    icon:Icon(Icons.calendar_today),
+                    labelText: "Enter Date"
+                ),
+            ),
+            TextFormField(
               readOnly: true,
               controller: timeInput,
               decoration: InputDecoration(

@@ -60,22 +60,34 @@ class _EventInvitation extends State<EventInvitation> {
                   if (user != null) {
                     list!.removeWhere((accounts) => accounts.a == user.uid);
                   }
+                  return SingleChildScrollView(
+                    child: Column(
+                      children:
+                      list!.map<Card>((value) {
+                        Icon icon = Icon(Icons.add_circle_outline);
 
-                  return DropdownButton(
-                    value: list![index].a,
-                    isExpanded: true,
-                    items: list.map<DropdownMenuItem<String>>((value) {
-                      return DropdownMenuItem<String>(
-                        value: value.a,
-                        child: Text('${value.b}'),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        index = list.indexWhere((element) => element.a == value!);
-                        userId = value!.toString();
-                      });
-                    },);
+                        return Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            child:ListTile(
+                              title: Text(value.b),
+                              leading: Icon(Icons.person_outline),
+
+                              // Delete Event Button
+                              trailing: IconButton(
+                                color: Colors.blue,
+                                icon: icon,
+                                onPressed: () {
+                                  setState(() {
+                                    db.addEventuser(eventId: widget.event.id, userId: value.a, eventDate: widget.event.get('date'));
+                                  });
+                                },
+                              ),
+                            )
+                        );
+                      }).toList(),
+                    ),
+                  );
                 }
                 else {
                   return CircularProgressIndicator();
@@ -83,22 +95,7 @@ class _EventInvitation extends State<EventInvitation> {
               }
           ),
           // Creates the invite button
-          TextButton(
-            style: TextButton.styleFrom(
-              primary: Colors.white,
-              backgroundColor: Colors.black,
-              textStyle: const TextStyle(fontSize: 20),
-            ),
-            // When button is pressed, the given user is invited to the currently opened event
-            onPressed: () {
-              db.addEventuser(eventId: widget.event.id, userId: userId, eventDate: widget.event.get('date'));
-              Navigator.of(context).pop();
-            },
-            child: const Text('Invite User'),
-          ),
-          Text(
-            widget.event.id,
-          )
+
 
 
           // THE CODE BELOW IS W.I.P. CODE FOR THE FUTURE
