@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -22,12 +23,17 @@ class _EventInvitation extends State<EventInvitation> {
 
   // Reference to the database
   User_Database db = User_Database();
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   // Direct link to another user's account for event invite testing
   String inviteId = "usINuOhqAyW5VxtVIEpobNdCDDJ3";
 
+  int index = 0;
+  String userId = '';
+
   @override
   Widget build(BuildContext context) {
+    User? user = auth.currentUser;
 
     // Creates the UI structure of the page
     return Scaffold(
@@ -41,17 +47,52 @@ class _EventInvitation extends State<EventInvitation> {
       // Creates a column of buttons
       // Currently is just 1 for easy testing but will be a list of users in the future
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          StreamBuilder(
+              stream: db.getAllUsers(),
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasData) {
+                  List<Pair>? list = snapshot.data?.docs.map((user) {
+                    return Pair(user.id, user.get('name'));
+                  }).toList();
+
+                  if (user != null) {
+                    list!.removeWhere((accounts) => accounts.a == user.uid);
+                  }
+
+                  return DropdownButton(
+                    value: list![index].a,
+                    isExpanded: true,
+                    items: list.map<DropdownMenuItem<String>>((value) {
+                      return DropdownMenuItem<String>(
+                        value: value.a,
+                        child: Text('${value.b}'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        index = list.indexWhere((element) => element.a == value!);
+                        userId = value!.toString();
+                      });
+                    },);
+                }
+                else {
+                  return CircularProgressIndicator();
+                }
+              }
+          ),
           // Creates the invite button
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
+              primary: Colors.white,
               backgroundColor: Colors.black,
               textStyle: const TextStyle(fontSize: 20),
             ),
             // When button is pressed, the given user is invited to the currently opened event
             onPressed: () {
-              db.addEventuser(eventId: widget.event.id, userId: inviteId, eventDate: widget.event.get('date'));
+              db.addEventuser(eventId: widget.event.id, userId: userId, eventDate: widget.event.get('date'));
+              Navigator.of(context).pop();
             },
             child: const Text('Invite User'),
           ),
@@ -105,4 +146,11 @@ class _EventInvitation extends State<EventInvitation> {
       // ),
     );
   }
+}
+
+class Pair<T1, T2> {
+  final T1 a;
+  final T2 b;
+
+  Pair(this.a, this.b);
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 
 import '../Scheduling/Home.dart';
 import '../Scheduling/TabManager.dart';
@@ -80,6 +81,27 @@ class _ProfileVerificationState extends State<ProfileVerification> {
           : Scaffold(
               appBar: AppBar(
                 title: const Text('Verify Email'),
+              ),
+              bottomNavigationBar: Container(
+                color: Theme.of(context).canvasColor,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15, vertical: 20
+                  ),
+                  child: GNav(
+                      backgroundColor: Theme.of(context).canvasColor,
+                      color: Colors.blue,
+                      activeColor: Colors.white,
+                      tabBackgroundColor: Colors.blue,
+                      padding: const EdgeInsets.all(16),
+                      gap: 8,
+                      tabs: const [
+                        GButton(icon: Icons.punch_clock_outlined, text: 'Upcoming'),
+                        GButton(icon: Icons.home_outlined, text: 'Home'),
+                        GButton(icon: Icons.settings_outlined, text: 'Settings'),
+                      ]
+                  ),
+                ),
               ),
               body: Padding(
                 padding: EdgeInsets.all(16),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lets_meet/Scheduling/Home.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../Login/Auth.dart';
 import '../Notifications/Notification_History.dart';
 import '../Scheduling/Event.dart';
 import '../Scheduling/EventDetail.dart';
@@ -39,6 +40,19 @@ class User_Database {
           .collection('Schedules')
           .doc('Plan').collection('Plans')
           .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
+    }
+  }
+
+  void add_event({required String title, required String description, required String location, required bool remind, required bool repeat, required List<String> comments, required DateTime date, required String time, required List<String> userIds}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null){
+      print('Adding');
+      users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Event').collection('Event')
+          .add({'title': title, 'description': description, 'date': date, 'time': time, 'location': location, 'repeat': repeat, 'remind': remind, 'comments': comments, 'userIds': userIds, 'titleSearch': titleSearchParam(title: title)});
     }
   }
 
@@ -78,18 +92,33 @@ class User_Database {
     return word;
   }
 
-  //getting the titles based on the search query of the user
+  //getting the titles based on the plan search query of the user
   getSearch({required String query}) {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
     query = query.toLowerCase();
     if (user != null) {
+      print(query);
+
       return users.doc(user.uid)
-          .collection('Notes')
+          .collection('Schedules').doc('Plan').collection('Plans')
           .where("titleSearch", arrayContains: query).snapshots(); //making sure that the title contains what is searched
       }
     }
 
+  //getting the titles based on the event search query of the user
+  getEventSearch({required String query}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+    query = query.toLowerCase();
+    if (user != null) {
+      print(query);
+
+      return users.doc(user.uid)
+          .collection('Schedules').doc('Event').collection('Event')
+          .where("titleSearch", arrayContains: query).snapshots(); //making sure that the title contains what is searched
+    }
+  }
 
     // getDate(){
     //   FirebaseAuth auth = FirebaseAuth.instance;
@@ -166,7 +195,8 @@ class User_Database {
     User? user = auth.currentUser;
 
     if (user != null){
-      users.add(user.uid);
+      print("Writing to Profile");
+      users.doc(user.uid).set({'name': name, 'uid': user.uid});
 
       users.doc(user.uid)
           .collection('Profile').add({'name': name, 'email': email});
@@ -187,9 +217,7 @@ class User_Database {
   // Kieran King
   // Creates a list of all app users' ids
   getAllUsers() {
-    return FirebaseFirestore.instance
-        .collection("Users")
-        .snapshots();
+    return users.snapshots();
   }
   get_upcoming_Events(){
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -271,6 +299,7 @@ class User_Database {
     User? user = auth.currentUser;
 
     if (user != null) {
+      print("Request Accepted");
      users.doc(user.uid)
          .collection('Schedules')
          .doc('Event').collection('InvitedEvents').add({'userId': request.get('userId'), 'eventId': request.get('eventId'), 'eventDate': request.get('eventDate')});
@@ -285,6 +314,7 @@ class User_Database {
     User? user = auth.currentUser;
 
     if (user != null) {
+      print("Request Removed");
       users.doc(user.uid)
           .collection('Schedules')
           .doc('Requests').collection('Requests')
@@ -297,16 +327,21 @@ class User_Database {
     User? user = auth.currentUser;
 
     if (user != null) {
+      print("Event Invitees List Being Updated");
       DocumentSnapshot<Map<String, dynamic>> qSnapshot = await users.doc(userId)
           .collection('Schedules').doc('Event').collection('Event').doc(eventId).get();
 
       List<dynamic> usersList = qSnapshot.get('userIds');
 
-      if (usersList[0] == "") {
-        usersList[0] = user.uid;
+      if (usersList.isNotEmpty) {
+        if (usersList[0] == "") {
+          usersList[0] == user.uid;
+        }
       }
       else {
-        usersList.add(user.uid);
+        Set<dynamic> usersSet = usersList.toSet();
+        usersSet.add(user.uid);
+        usersList = usersSet.toList();
       }
 
       users.doc(userId)
@@ -335,6 +370,15 @@ class User_Database {
     if (user != null) {
       return users.doc(user.uid)
           .collection('Schedules').doc("Event").collection("Event").snapshots();
+    }
+  }
+
+  get_event({required String eventId}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if(user != null){
+      return users.doc(user.uid).collection('Schedules').doc('Event').collection('Event').doc(eventId).snapshots();
     }
   }
 }
@@ -382,7 +426,6 @@ class User_Database {
 //   }
 // }
 
-
 class DisplaySearch extends StatefulWidget {
   //creating the key for the display search
   final String query;
@@ -404,25 +447,72 @@ class ReadSearch extends State<DisplaySearch> {
           stream: db.getSearch(query:widget.query), //getting the search from database
           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (!snapshot.hasData) {
-              return ListView(); //returning the list view of the searches
+              print('No Search Data');
+              return ListView(shrinkWrap: true,); //returning the list view of the searches
             }
-            return ListView(
-              children: snapshot.data!.docs.map((search) {
-                return Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                  ),
-                  padding: const EdgeInsets.fromLTRB(20,30,20,30),
-                  alignment: Alignment.center,
-                  child:
-                  ExpansionTile (
-                    title: Text(search.get('title') as String), //getting the String title
-               // onTap: () => Navigator.pop(context)
-              //children: [Text(note.get('body') as String)],
-            )
-        );
-      }).toList(),
-    );
+            return StreamBuilder(
+              stream: db.getEventSearch(query:widget.query), //getting the search from database
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> Eventsnapshot) {
+                if (!snapshot.hasData) {
+                  print('No Search Data');
+                  return ListView(shrinkWrap: true,); //returning the list view of the searches
+                }
+                List<GestureDetector> eventList = Eventsnapshot.data!.docs.map((search) {
+                  return GestureDetector(
+                    key: Key(search.get('title')),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search))),
+                    child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child:ListTile(
+                          title: Text(search.get('title')),
+                          // Delete Event Button
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_forever_rounded, color: Colors.red,),
+                            onPressed: () {
+                              setState(() {
+                                db.remove_event(id: search.id);
+                              });
+                            },
+                          ),
+                        )
+                    ),
+                  );
+                }).toList();
+
+                List<GestureDetector> searchList = snapshot.data!.docs.map((search) {
+                  return GestureDetector(
+                    key: Key(search.get('title')),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search))),
+                    child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child:ListTile(
+                          title: Text(search.get('title')),
+                          // Delete Event Button
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_forever_rounded, color: Colors.red,),
+                            onPressed: () {
+                              setState(() {
+                                db.remove_event(id: search.id);
+                              });
+                            },
+                          ),
+                        )
+                    ),
+                  );
+                }).toList();
+
+                if (eventList.isNotEmpty) {
+                  for (var gesture_detector in eventList) {
+                    searchList.add(gesture_detector);
+                  }
+                }
+                return Column(
+                  children: searchList
+                );
+              },
+            );
     },
         ),
     );
@@ -515,6 +605,28 @@ class ReadNotificationHistory_ extends State<DisplayNotificationHistory_> {
     User_Database db = User_Database(); //connecting to the user database
 
     return Scaffold(
+      // Top bar that has Sign Out button
+      appBar: AppBar(
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          centerTitle: Theme.of(context).appBarTheme.centerTitle,
+          title: const Text('Upcoming'),
+          actions: <Widget>[
+            Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: GestureDetector(
+                  child: const Icon(
+                    Icons.exit_to_app,
+                    size: 26.0,
+                  ),
+                  onTap: () => FirebaseAuth.instance.signOut().then((res) {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()),
+                    );
+                  },
+                  ),
+                )
+            )
+          ]
+      ),
       body: StreamBuilder(
         stream: db.get_upcoming_Events(), //getting events from the database
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -527,7 +639,7 @@ class ReadNotificationHistory_ extends State<DisplayNotificationHistory_> {
                 key: Key(event.get('title')), //getting the event name and information from events
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotificationHistory(event: event))),
                 child: Card(
-                    elevation: 100,
+                    elevation: 4,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
                     color:Colors.blue,
                     child:ListTile(

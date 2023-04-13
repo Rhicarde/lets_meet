@@ -23,6 +23,8 @@ class _RequestMenu extends State<RequestMenu> {
             return const SizedBox(height: double.maxFinite, child: ListTile());
           }
           else if (snapshot.hasData) {
+            print('SNAPSHOTS: ${snapshot.data?.docs.length}');
+
             return Drawer(
               child: SingleChildScrollView(
                 child: Column(

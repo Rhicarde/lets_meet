@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:intl/intl.dart';
+import 'package:lets_meet/Database/Schedule%20Database.dart';
 import 'package:lets_meet/Scheduling/Schedule.dart';
 import 'package:search_map_location/utils/google_search/place.dart';
 import 'package:search_map_location/utils/google_search/place_type.dart';
@@ -76,6 +77,8 @@ class _CreateEvent extends State<Event>{
   Widget build(BuildContext context) {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
+    User_Database db = User_Database();
+
     // declarations
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');
@@ -283,23 +286,10 @@ class _CreateEvent extends State<Event>{
                     final result = response.results[0].formattedAddress;
                     db_location = result as String;
                     //saving event data to database
-                    Map<String, dynamic> dataToSave = {
-                      'title': db_title,
-                      'description': db_body,
-                      'date': dateTime,
-                      'time': db_time,
-                      'location': db_location,
-                      'repeat': check1,
-                      'remind': check2,
-                      'comments': [input_comment],
-                      'userIds': []
-                    };
+                    db.add_event(title: db_title, description: db_body, location: db_location, remind: check2, repeat: check1, comments: [input_comment], date: dateTime, time: db_time, userIds: []);
 
-                    // Add data to database
-                    FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').add(dataToSave);
                     // eList.add(Event(dateTime, "New"));
                     // db.add_note(body: body, title: title);
-                    //Navigator.pop(Schedule());
                     Navigator.of(context).pop();
                   },
                   // Create Event Button
