@@ -4,6 +4,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:lets_meet/Notifications/DisplayUpcoming.dart';
 import 'package:lets_meet/Profile/profile_screen.dart';
 import '../Home/Home.dart';
+import '../Search/Search.dart';
 
 // Tab Manager manages the indexing and swapping between screens on the navigation bar
 class Pages extends StatefulWidget {
@@ -21,6 +22,7 @@ class _Pages extends State<Pages>{
   List<Widget> pages = const [
     DisplayUpcoming(),
     Home(),
+    Search(),
     ProfileScreen(),
     // Verification(),
   ];
@@ -52,6 +54,7 @@ class _Pages extends State<Pages>{
               tabs: const [
                 GButton(icon: Icons.punch_clock_outlined, text: 'Upcoming'),
                 GButton(icon: Icons.home_outlined, text: 'Home'),
+                GButton(icon: Icons.search_outlined, text: 'Search'),
                 GButton(icon: Icons.settings_outlined, text: 'Settings'),
               ]
           ),

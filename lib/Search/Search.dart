@@ -33,36 +33,9 @@ class _Search extends State<Search> {
   Widget build(BuildContext context) {
         return Scaffold(
             appBar: EasySearchBar( //creating the search bar which takes in user input
-                title: const Text('LetsPlan'),
-                searchHintText: 'Search Title',
+                title: const Text('Search'),
+                searchHintText: 'Search by Title',
                 foregroundColor: Colors.white,
-                actions: <Widget>[
-                  Padding(
-                      padding: const EdgeInsets.only(right: 20.0),
-                      child: GestureDetector(
-                        child: const Icon(
-                          Icons.refresh_outlined,
-                          size: 26.0,
-                        ),
-                        onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfileVerification())
-                        ),
-                      )
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.only(right: 20.0),
-                      child: GestureDetector(
-                        child: const Icon(
-                          Icons.exit_to_app,
-                          size: 26.0,
-                        ),
-                        onTap: () => FirebaseAuth.instance.signOut().then((res) {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()),
-                          );
-                        },
-                        ),
-                      )
-                  )
-                ],
                 //search based on value constantly updating whenever the user types characters
                 onSearch: (value) => setState(() => searchValue = value)
                   ),
