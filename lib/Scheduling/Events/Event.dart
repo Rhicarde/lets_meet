@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:intl/intl.dart';
-import 'package:lets_meet/Scheduling/Schedule.dart';
 import 'package:search_map_location/utils/google_search/place.dart';
 import 'package:search_map_location/utils/google_search/place_type.dart';
-import 'package:table_calendar/table_calendar.dart';
-import '../Shared/constants.dart';
 import 'package:search_map_location/search_map_location.dart';
 
+import '../../Database/Schedule Database.dart';
+import '../../Shared/constants.dart';
 import '../Plans/Schedule.dart';
 
 // TODO: Link created event to schedule
@@ -297,9 +296,6 @@ class _CreateEvent extends State<Event>{
                     db_location = result as String;
                     //saving event data to database
                     db.add_event(title: db_title, description: db_body, location: db_location, remind: check2, repeat: check1, comments: [input_comment], date: dateTime, time: db_time, userIds: []);
-
-                    // Add data to database
-                    FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').add(dataToSave);
                     // eList.add(Event(dateTime, "New"));
                     // db.add_note(body: body, title: title);
                     //Navigator.pop(Schedule());
