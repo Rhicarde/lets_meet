@@ -93,7 +93,7 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     // get location of event
     String _dbEventLocation = widget.event.get('location');
 
-    // get placeid of event
+    // get placeid of events
     String _dbplaceID = widget.event.get("placeid");
 
     return Scaffold(
