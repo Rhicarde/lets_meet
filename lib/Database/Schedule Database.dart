@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_meet/Scheduling/OptimalDeparture.dart';
+import 'package:lets_meet/Scheduling/Weather/get_location.dart';
 
 import '../Scheduling/EventDetail.dart';
 //import '../Scheduling/OptimalDeparture.dart';
