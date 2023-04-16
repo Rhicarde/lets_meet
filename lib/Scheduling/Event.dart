@@ -41,20 +41,22 @@ class _CreateEvent extends State<Event>{
   get minutes => null;
 
 
+
   // Event List Declaration
   late final ValueNotifier<List<Event>> _selectedEvents;
   List<Event> eList = [];
 
   // method to return all events on a given day
-  // List<Event> _getEventsForDay () {
-  //   List<Event> list = <Event>[];
-  //   for (Event e in eList) {
-  //     if (DateUtils.isSameDay(e.date, viewedDate)){
-  //       list.add(e);
-  //     }
-  //   }
-  //   return list;
-  // }
+  List<Event> _getEventsForDay (DateTime day) {
+    List<Event> list = <Event>[];
+    for (Event e in eList) {
+      if (DateUtils.isSameDay(e.date, day)){
+        list.add(e);
+      }
+    }
+    return list;
+  }
+
 
   String error = "";
   bool check1 = false;
@@ -62,6 +64,7 @@ class _CreateEvent extends State<Event>{
   String db_title = "";
   String db_body = "";
   String db_location = "";
+  String db_placeid = "";
   String event_comment = "";
   String input_comment = "";
   String cid = "";
@@ -211,6 +214,7 @@ class _CreateEvent extends State<Event>{
                 setState(() {
                   // display chosen address
                   db_location = (place.placeId) as String;
+                  db_placeid = (place.placeId);
                 });
               },
               //   onSelected: (Place place) async {
@@ -227,7 +231,7 @@ class _CreateEvent extends State<Event>{
                     value: check1,
                     onChanged: (bool? value) {setState(() {
                       check1 = value!;
-                    });
+                      });
                     }),
                 Text("Remind"),
                 Checkbox(
@@ -291,6 +295,8 @@ class _CreateEvent extends State<Event>{
                       'location': db_location,
                       'repeat': check1,
                       'remind': check2,
+                      'comments': [input_comment],
+                      "placeid" : db_placeid
                       'comments': [input_comment],
                       'userIds': []
                     };
