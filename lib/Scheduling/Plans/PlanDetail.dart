@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../Database/Schedule Database.dart';
-import '../Shared/constants.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Shared/constants.dart';
 
 class DisplayPlanDetail extends StatefulWidget {
   final QueryDocumentSnapshot plan;

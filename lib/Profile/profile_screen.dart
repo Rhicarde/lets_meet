@@ -62,20 +62,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         //backgroundColor: Colors.pink.shade400,
         title: const Center(
-          child: Text('Profile Screen', style: TextStyle(
-            fontSize: 35,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontFamily: "Signatra",
-          ),),
+          child: Text('Profile Screen'),
         ),
-        // Creates the back-to-home arrow
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            // Implement return to home functionality
-          }
-        )
       ),
       body: Container(
         decoration: BoxDecoration(

@@ -10,6 +10,8 @@ import 'package:table_calendar/table_calendar.dart';
 import '../Shared/constants.dart';
 import 'package:search_map_location/search_map_location.dart';
 
+import '../Plans/Schedule.dart';
+
 // TODO: Link created event to schedule
 class Event extends StatefulWidget {
   // constructor
@@ -25,6 +27,8 @@ class _CreateEvent extends State<Event>{
   TextEditingController event_title = TextEditingController();
   TextEditingController description = TextEditingController();
   TextEditingController location = TextEditingController();
+  TextEditingController timeInput = TextEditingController();
+
   // Variable Declarations
   // late CalendarFormat _calendarFormat = CalendarFormat.month;
   late DateTime dateTime = DateTime.now();
@@ -32,7 +36,7 @@ class _CreateEvent extends State<Event>{
   late DateTime _selectedDay = _focusedDay;
   DateTime currentDate = DateTime.now();
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
-  TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
+  TimeOfDay current_time = TimeOfDay.now();
 
 
   // Getters
@@ -41,22 +45,20 @@ class _CreateEvent extends State<Event>{
   get minutes => null;
 
 
-
   // Event List Declaration
   late final ValueNotifier<List<Event>> _selectedEvents;
   List<Event> eList = [];
 
   // method to return all events on a given day
-  List<Event> _getEventsForDay (DateTime day) {
-    List<Event> list = <Event>[];
-    for (Event e in eList) {
-      if (DateUtils.isSameDay(e.date, day)){
-        list.add(e);
-      }
-    }
-    return list;
-  }
-
+  // List<Event> _getEventsForDay () {
+  //   List<Event> list = <Event>[];
+  //   for (Event e in eList) {
+  //     if (DateUtils.isSameDay(e.date, viewedDate)){
+  //       list.add(e);
+  //     }
+  //   }
+  //   return list;
+  // }
 
   String error = "";
   bool check1 = false;
@@ -68,7 +70,7 @@ class _CreateEvent extends State<Event>{
   String event_comment = "";
   String input_comment = "";
   String cid = "";
-  String db_time = "";
+  String db_time = DateFormat.jm().format(DateTime.now());
   //final DateTime date;
   //final String state;
   Color color = Colors.blue;
@@ -79,14 +81,14 @@ class _CreateEvent extends State<Event>{
   Widget build(BuildContext context) {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
-    // declarations
-    final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
-    final minutes = dateTime.minute.toString().padLeft(2, '0');
-
+    User_Database db = User_Database();
 
     // declaring date variables for date dropdown
     DateTime selectedDate = DateTime.now();
     String formattedDate = DateFormat('MM/dd/yyyy').format(selectedDate);
+
+    String formattedTime = current_time.format(context);
+    timeInput.text = formattedTime;
 
 
     return Scaffold(
@@ -186,23 +188,31 @@ class _CreateEvent extends State<Event>{
 
             // Time Display
             // Time Selector Button
-            ElevatedButton(
-                child: Text('${time.hour}:${time.minute}'),
-                onPressed: () async {
-                  TimeOfDay? newTime = await showTimePicker(
-                      context: context,
-                      initialTime: time);
+            TextFormField(
+              controller: timeInput,
+              decoration: const InputDecoration(
+                  icon: Icon(Icons.timer),
+                  labelText: "Enter Time"
+              ),
+              readOnly: true,
+              onTap: () async {
+                final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(hour: current_time.hour, minute: current_time.minute));
+                if (time == null) return;
+                setState(() {
+                  //for rebuilding the ui
+                  // display new selected time
+                  timeInput.text = time.format(context);
+                  current_time = time;
+                  // updated time
+                  dateTime = DateTime(
+                      dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
 
-                  // Cancel return NUll
-                  if (newTime == null) return;
-
-                  // OK return TimeofDay
-                  setState(() {
-                    time = newTime;
-                  });
-                  db_time = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-
-                }),
+                  db_time = time.format(context);
+                });
+              },
+            ),
             // TextFormField for Location Selection
             SearchLocation(
               apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y', // Google Places API key
@@ -214,7 +224,6 @@ class _CreateEvent extends State<Event>{
                 setState(() {
                   // display chosen address
                   db_location = (place.placeId) as String;
-                  db_placeid = (place.placeId);
                 });
               },
               //   onSelected: (Place place) async {
@@ -231,7 +240,7 @@ class _CreateEvent extends State<Event>{
                     value: check1,
                     onChanged: (bool? value) {setState(() {
                       check1 = value!;
-                      });
+                    });
                     }),
                 Text("Remind"),
                 Checkbox(
@@ -287,19 +296,7 @@ class _CreateEvent extends State<Event>{
                     final result = response.results[0].formattedAddress;
                     db_location = result as String;
                     //saving event data to database
-                    Map<String, dynamic> dataToSave = {
-                      'title': db_title,
-                      'description': db_body,
-                      'date': dateTime,
-                      'time': db_time,
-                      'location': db_location,
-                      'repeat': check1,
-                      'remind': check2,
-                      'comments': [input_comment],
-                      "placeid" : db_placeid
-                      'comments': [input_comment],
-                      'userIds': []
-                    };
+                    db.add_event(title: db_title, description: db_body, location: db_location, remind: check2, repeat: check1, comments: [input_comment], date: dateTime, time: db_time, userIds: []);
 
                     // Add data to database
                     FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').add(dataToSave);

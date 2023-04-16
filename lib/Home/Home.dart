@@ -2,16 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lets_meet/Notifications/Notification_Services.dart';
-import 'package:lets_meet/Profile/profile_screen.dart';
-import 'package:lets_meet/Scheduling/Notes.dart';
+import 'package:intl/intl.dart';
 import 'package:lets_meet/Scheduling/Weather/Weather.dart';
-import '../Database/Schedule Database.dart';
-import '../Login/Auth.dart';
-import '../Login/Login.dart';
-import '../main.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Login/Auth.dart';
+import '../Scheduling/Events/DisplayEvents.dart';
+import '../Scheduling/Plans/DisplaySchedule.dart';
+import '../Scheduling/Plans/Schedule.dart';
 import 'RequestMenu.dart';
-import 'Schedule.dart';
 
 // The main home screen that the user see's when logging on
 // Displays weather, date, schedule, and event made for given day
@@ -22,14 +20,11 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home>{
-  // bool areDatesEqual(DateTime date1, DateTime date2) {
-  //   if(date1.day == date2.day && date1.month == date2.month && date1.year == date2.year) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
+  User_Database db = User_Database();
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   DateTime viewedDate = DateUtils.dateOnly(DateTime.now());
+  var dateFormat = DateFormat('MMMM dd');
 
   // Kieran King
   // Increases the currently viewed date on the home page by 1
@@ -42,14 +37,19 @@ class _Home extends State<Home>{
     viewedDate = viewedDate.subtract(const Duration(days: 1));
   }
 
+  int index = 0;
+  String userId = '';
   @override
   Widget build(BuildContext context) {
+    User? user = auth.currentUser;
+    
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       // Top bar that has Sign Out button
-      appBar: AppBar(
+      appBar: AppBar( //creating the search bar which takes in user input
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
-          title: const Text('Lets Plan'),
+          title: const Text('LetsPlan'),
           actions: <Widget>[
             Padding(
                 padding: const EdgeInsets.only(right: 20.0),
@@ -60,13 +60,14 @@ class _Home extends State<Home>{
                   ),
                   onTap: () => FirebaseAuth.instance.signOut().then((res) {
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()),
-                      );
-                    },
+                    );
+                  },
                   ),
                 )
             )
-          ]
+          ],
       ),
+
       // A side bar menu that allows user to view all incoming requests
       drawer: RequestMenu(),
       // Floating Action Button is used to add a new plan/event
@@ -110,17 +111,58 @@ class _Home extends State<Home>{
                           onPressed: () {
                             showDialog(
                               context: context,
-                              builder: (ctx) => Notes()/*AlertDialog(
-                                title: const Text("Declined"),
-                                content: const Text("Compare request has been declined"),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("Ok")),
-                                ],
-                              )*/,
+                              builder: (ctx) => StreamBuilder(
+                                  stream: db.getAllUsers(),
+                                  builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (snapshot.hasData) {
+                                      List<Pair>? list = snapshot.data?.docs.map((user) {
+                                        return Pair(user.id, user.get('name'));
+                                      }).toList();
+
+                                      if (user != null) {
+                                        list!.removeWhere((accounts) => accounts.a == user.uid);
+                                      }
+
+                                      return StatefulBuilder(
+                                      builder: (BuildContext context, StateSetter dropdownState) {
+                                        return AlertDialog(
+                                          title: const Text(
+                                              "Select User"),
+                                          content: DropdownButton(
+                                            value: list![index].a,
+                                            isExpanded: true,
+                                            items: list.map<DropdownMenuItem<String>>((value) {
+                                              return DropdownMenuItem<String>(
+                                                value: value.a,
+                                                child: Text('${value.b}'),
+                                              );
+                                            }).toList(),
+                                            onChanged: (Object? value) {
+                                              dropdownState(() {
+                                                index = list.indexWhere((element) => element.a == value!);
+                                                userId = value.toString();
+                                              });
+                                            },
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  // TODO: ADD FUNCTIONALITY FOR COMPARE SCHEDULE HERE
+
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("Compare")),
+                                          ],
+                                        );
+                                      }
+
+                                      );
+                                    }
+                                    else {
+                                      return CircularProgressIndicator();
+                                    }
+                                  }
+                              )
                             );
                           },
                           child: const Text("Share")),
@@ -166,7 +208,7 @@ class _Home extends State<Home>{
                       if (newDate == null) return;
                       setState(() => viewedDate = DateUtils.dateOnly(newDate));
                     },
-                    icon: Icon(Icons.calendar_month),
+                    icon: Text('${dateFormat.format(viewedDate)}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                     color: Colors.black,
                     iconSize: 50,
                   ),
@@ -188,6 +230,13 @@ class _Home extends State<Home>{
         ),
     );
   }
+}
+
+class Pair<T1, T2> {
+  final T1 a;
+  final T2 b;
+
+  Pair(this.a, this.b);
 }
 
 

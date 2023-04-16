@@ -3,10 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lets_meet/Scheduling/Event.dart';
-import 'package:lets_meet/Scheduling/EventDetail.dart';
-import '../Database/Schedule Database.dart';
-import '../Shared/constants.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Shared/constants.dart';
 
 class DisplayEventEdit extends StatefulWidget {
   final QueryDocumentSnapshot event;
