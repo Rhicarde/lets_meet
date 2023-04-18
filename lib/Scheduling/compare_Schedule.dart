@@ -1,99 +1,220 @@
+import 'dart:collection';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:lets_meet/Scheduling/Events/Event.dart';
+import 'package:table_calendar/table_calendar.dart';
 
-class create_Schedule extends StatefulWidget {
+import 'CalendarItem.dart';
+import 'Calendar_Event.dart';
+import 'Plans/Schedule.dart';
 
-  final Function? toggleView;
-  create_Schedule({this.toggleView});
+class compare_schedule extends StatefulWidget {
+  final int month;
+  final String compareId;
 
-  _CreateSchedule createState() => _CreateSchedule();
+  const compare_schedule({Key? key, required this.compareId, required this.month}) : super(key: key);
+
+  _compareSchedule createState() => _compareSchedule();
+
 }
 
-class _CreateSchedule extends State<create_Schedule>{
-  late final CalendarFormat _calendarFormat = CalendarFormat.month;
-  late DateTime dateTime = DateTime.now();
-  late DateTime _focusedDay = DateTime.now();
-  late DateTime _selectedDay = _focusedDay;
+class _compareSchedule extends State<compare_schedule> {
+  FirebaseAuth auth = FirebaseAuth.instance;
+  late User? user;
+  late String userId;
 
-  DateTime currentDate = DateTime.now();
-  DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+  late DateTime _focusedDay;
+  late DateTime _firstDay;
+  late DateTime _lastDay;
+  late DateTime _selectedDay;
+  late CalendarFormat _calendarFormat;
+  late Map<DateTime, List<Calendar_Event>> _cal_events;
 
-  late final ValueNotifier<List<Event>> _selectedEvents;
-  List<Event> eList = [];
-
-  // TODO: Optimize!
-  List<Event> _getEventsForDay (DateTime day) {
-    List<Event> list = <Event>[];
-    for (Event e in eList) {
-      if (DateUtils.isSameDay(e.date, day)){
-        list.add(e);
-      }
-    }
-    if (list.length > 1) {
-      for (int i = 0; i < (list.length - 1); i++) {
-        for (int j = 1; j < (list.length); j++) {
-          if (list[i].date?.hour == list[j].date?.hour) {
-            //list[i].color = Colors.red;
-            //list[j].color = Colors.red;
-          }
-        }
-      }
-    }
-
-    return list;
+  int getHashCode(DateTime key) {
+    return key.day * 1000000 + key.month * 10000 + key.year;
   }
 
   @override
   void initState() {
     super.initState();
+    _cal_events = LinkedHashMap(
+      equals: isSameDay,
+      hashCode: getHashCode,
+    );
+    
+    User? user = auth.currentUser;
+    if (user != null){
+      userId = user.uid;
+    }
 
-    _selectedDay = _focusedDay;
-    _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay));
+    DateTime _compareStartDate = DateTime(DateTime.now().year, widget.month, 1);
+    DateTime _compareEndDate = DateTime(DateTime.now().year, widget.month + 1, 0);
+
+    _focusedDay = _compareStartDate;
+    _firstDay = _compareStartDate;
+    _lastDay = _compareEndDate;
+    _selectedDay = _compareStartDate;
+    _calendarFormat = CalendarFormat.month;
+    _loadAllCalendarSchedule();
   }
 
-  void dispose() {
-    _focusedDay = DateTime.now();
+  _loadAllCalendarSchedule() async {
+    final firstDay = DateTime(_focusedDay.year, _focusedDay.month, 1);
+    final lastDay = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
+    _cal_events = {};
 
-    super.dispose();
+    var snap = await FirebaseFirestore.instance
+        .collection('Users').doc(userId).collection('Schedules').doc('Plan').collection('Plans')
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThanOrEqualTo: lastDay)
+        .withConverter(
+        fromFirestore: Calendar_Event.fromPlanFirestore,
+        toFirestore: (Calendar_Event cal_event, options) => cal_event.toFirestore())
+        .get();
+
+    for (var doc in snap.docs) {
+      final cal_event = doc.data();
+
+      final day =
+      DateTime.utc(cal_event.date.year, cal_event.date.month, cal_event.date.day);
+      if (_cal_events[day] == null) {
+        _cal_events[day] = [];
+      }
+      _cal_events[day]!.add(cal_event);
+    }
+
+    snap = await FirebaseFirestore.instance
+        .collection('Users').doc(userId).collection('Schedules').doc('Event').collection('Event')
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThanOrEqualTo: lastDay)
+        .withConverter(
+        fromFirestore: Calendar_Event.fromEventFirestore,
+        toFirestore: (Calendar_Event cal_event, options) => cal_event.toFirestore())
+        .get();
+
+    for (var doc in snap.docs) {
+      final cal_event = doc.data();
+
+      final day =
+      DateTime.utc(cal_event.date.year, cal_event.date.month, cal_event.date.day);
+      if (_cal_events[day] == null) {
+        _cal_events[day] = [];
+      }
+      _cal_events[day]!.add(cal_event);
+    }
+
+    snap = await FirebaseFirestore.instance
+        .collection('Users').doc(widget.compareId).collection('Schedules').doc('Plan').collection('Plans')
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThanOrEqualTo: lastDay)
+        .withConverter(
+        fromFirestore: Calendar_Event.fromOtherPlanFirestore,
+        toFirestore: (Calendar_Event cal_event, options) => cal_event.toFirestore())
+        .get();
+
+    for (var doc in snap.docs) {
+      final cal_event = doc.data();
+
+      final day =
+      DateTime.utc(cal_event.date.year, cal_event.date.month, cal_event.date.day);
+      if (_cal_events[day] == null) {
+        _cal_events[day] = [];
+      }
+      _cal_events[day]!.add(cal_event);
+    }
+
+    snap = await FirebaseFirestore.instance
+        .collection('Users').doc(widget.compareId).collection('Schedules').doc('Event').collection('Event')
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThanOrEqualTo: lastDay)
+        .withConverter(
+        fromFirestore: Calendar_Event.fromOtherEventFirestore,
+        toFirestore: (Calendar_Event cal_event, options) => cal_event.toFirestore())
+        .get();
+
+    for (var doc in snap.docs) {
+      final cal_event = doc.data();
+
+      final day =
+      DateTime.utc(cal_event.date.year, cal_event.date.month, cal_event.date.day);
+      if (_cal_events[day] == null) {
+        _cal_events[day] = [];
+      }
+      _cal_events[day]!.add(cal_event);
+    }
+
+    setState(() {});
   }
 
-  String error = "";
-  bool check = false;
+  List<Calendar_Event> _getEventsForTheDay(DateTime day) {
+    return _cal_events[day] ?? [];
+  }
 
   Widget build(BuildContext context) {
-    final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
-    final minutes = dateTime.minute.toString().padLeft(2, '0');
-
     return Scaffold(
         appBar: AppBar(
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             centerTitle: Theme.of(context).appBarTheme.centerTitle,
-            title: const Text('Lets Meet'),
+            title: const Text('Compare Schedule'),
             actions: const <Widget>[]
         ),
-        body: Column (
+        body: ListView(
           children: [
-            const SizedBox(
-              height: 20,
-            ),
             TableCalendar(
-              headerStyle: const HeaderStyle(
-                titleCentered: true,
-                formatButtonVisible: false,
+              headerStyle: HeaderStyle(
+                formatButtonVisible : false,
+                leftChevronVisible: false,
+                rightChevronVisible: false,
               ),
+              eventLoader: _getEventsForTheDay,
+              calendarFormat: _calendarFormat,
+              onFormatChanged: (format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              },
+              focusedDay: _focusedDay,
+              firstDay: _firstDay,
+              lastDay: _lastDay,
+              onPageChanged: (focusedDay) {
+                setState(() {
+                  _focusedDay = focusedDay;
+                });
+                _loadAllCalendarSchedule();
+              },
+              selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+              onDaySelected: (selectedDay, focusedDay) {
+                print(_cal_events[selectedDay]);
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              },
               calendarStyle: const CalendarStyle(
-                isTodayHighlighted: false,
-                outsideDaysVisible: true,
+                weekendTextStyle: TextStyle(
+                  color: Colors.blue,
+                ),
+                selectedDecoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.blue,
+                ),
               ),
               calendarBuilders: CalendarBuilders(
-                markerBuilder: (BuildContext context, date, events) {
-                  if (events.isEmpty) return const SizedBox();
+                headerTitleBuilder: (context, day) {
+                  return Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(DateFormat('MMMM dd, yyyy').format(day), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  );
+                },
+                markerBuilder: (BuildContext context, date, _cal_events) {
+                  if (_cal_events.isEmpty) return SizedBox();
                   return ListView.builder(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
-                      itemCount: events.length,
+                      itemCount: _cal_events.length,
                       itemBuilder: (context, index) {
                         return Container(
                           margin: const EdgeInsets.only(top: 20),
@@ -103,76 +224,53 @@ class _CreateSchedule extends State<create_Schedule>{
                             width: 5,
                             decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: getCodeColor(events[index])),
+                                color: getCodeColor(_cal_events[index])),
                           ),
                         );
                       });
                 },
               ),
-              focusedDay: _focusedDay,
-              firstDay: DateTime(DateTime.now().year, DateTime.now().month,) ,
-              lastDay: DateTime(DateTime.now().year, DateTime.now().month + 1, 0),
-              calendarFormat: _calendarFormat,
-              eventLoader: (day) {
-                return _getEventsForDay(day);
-              },
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                  _selectedEvents.value = _getEventsForDay(selectedDay);
-                });
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-              availableCalendarFormats: const {
-                CalendarFormat.month: 'Month'
-              },
             ),
-            const SizedBox(height: 8.0),
-            Expanded(
-              child: ValueListenableBuilder<List<Event>>(
-                valueListenable: _selectedEvents,
-                builder: (context, value, _) {
-                  return ListView.builder(
-                    itemCount: value.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 4.0,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius: BorderRadius.circular(12.0),
-                          color: value[index].color
-                        ),
-                        child: ListTile(
-                          title: Text('${value[index].state} | ${DateFormat('HH:mm').format(value[index].date)}'),
-                          selectedTileColor: value[index].color,
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+            SizedBox(height: 20,),
+            ..._getEventsForTheDay(_selectedDay).map(
+                  (schedule) => CalendarItem(
+                  schedule: schedule,
+                  ),
             ),
           ],
-        )
+        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Schedule(
+                selectedDay: _selectedDay,
+              ),
+            ),
+          );
+          if (result ?? false) {
+            _loadAllCalendarSchedule();
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
-  Future<TimeOfDay?> pickTime() => showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute));
-}
-
-Color getCodeColor(dynamic e){
-  return e.color;
+  Color getCodeColor(dynamic e){
+    switch (e.type) {
+      case 'self_plan':
+        return Colors.blue;
+      case 'self_event':
+        return Colors.blue;
+      case 'other_plan':
+        return Colors.yellow;
+      case 'other_event':
+        return Colors.yellow;
+    }
+    return Colors.black;
+  }
 }
 
 

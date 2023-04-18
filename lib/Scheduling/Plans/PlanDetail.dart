@@ -27,10 +27,10 @@ class PlanDetail extends State<DisplayPlanDetail> {
     User_Database db = User_Database();
 
     _titleTextController.text = widget.plan.get('title');
-    _bodyTextController.text = widget.plan.get('body');
+    _bodyTextController.text = widget.plan.get('description');
 
     // Get Timestamp from Firebase and Convert to DateTime
-    DateTime dateTime = widget.plan.get('time').toDate();
+    DateTime dateTime = widget.plan.get('date').toDate();
 
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');

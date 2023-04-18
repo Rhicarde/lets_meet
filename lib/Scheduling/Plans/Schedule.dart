@@ -7,9 +7,10 @@ import '../../Shared/constants.dart';
 
 // Screen to add info on a new plan
 class Schedule extends StatefulWidget {
+  final DateTime selectedDay;
 
   final Function? toggleView;
-  Schedule({this.toggleView});
+  Schedule({this.toggleView, required this.selectedDay});
 
   _CreateSchedule createState() => _CreateSchedule();
 }
@@ -22,13 +23,16 @@ class _CreateSchedule extends State<Schedule> {
   TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
 
-  DateTime dateTime = DateTime.now();
   DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
   TimeOfDay current_time = TimeOfDay.now();
+
+  late DateTime dateTime;
 
   @override
   void initState() {
     super.initState();
+
+    dateTime = widget.selectedDay;
   }
 
   String error = "";
@@ -65,7 +69,7 @@ class _CreateSchedule extends State<Schedule> {
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Schedule()));
+                        MaterialPageRoute(builder: (context) => Schedule(selectedDay: dateTime,)));
                   },
                   style: TextButton.styleFrom(
                       minimumSize: const Size(150, 30),
@@ -79,7 +83,7 @@ class _CreateSchedule extends State<Schedule> {
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(context, MaterialPageRoute(
-                        builder: (context) => Event(DateTime.now())));
+                        builder: (context) => Event(selectedDay: dateTime,)));
                   },
                   style: TextButton.styleFrom(
                       primary: Colors.grey,
@@ -132,7 +136,7 @@ class _CreateSchedule extends State<Schedule> {
                     setState(() {
                       //for rebuilding the ui
                       // display new selected date
-                      formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+                      formattedDate = DateFormat('MM/dd/yyyy').format(pickedDate);
                       dateInput.text = formattedDate;
                       // updated dateTime
                       dateTime = DateTime(
@@ -193,11 +197,11 @@ class _CreateSchedule extends State<Schedule> {
               child: ElevatedButton(
                   onPressed: () {
                     print(dateTime);
-                    db.add_note(body: _bodyTextController.text,
+                    db.add_note(description: _bodyTextController.text,
                         remind: remind,
                         repeat: repeat,
                         title: _titleTextController.text,
-                        time: dateTime);
+                        date: dateTime);
                     Navigator.pop(context);
                   },
                   child: const Text('Create')),

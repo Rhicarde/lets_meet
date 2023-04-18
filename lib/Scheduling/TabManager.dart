@@ -24,7 +24,6 @@ class _Pages extends State<Pages>{
     Home(),
     Search(),
     ProfileScreen(),
-    // Verification(),
   ];
 
   @override

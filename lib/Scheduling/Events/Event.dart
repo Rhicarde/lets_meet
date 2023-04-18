@@ -13,8 +13,9 @@ import '../Plans/Schedule.dart';
 
 // TODO: Link created event to schedule
 class Event extends StatefulWidget {
-  // constructor
-  Event(DateTime current_date);
+  final DateTime selectedDay;
+  const Event({Key? key, required this.selectedDay}) : super(key: key);
+
   // getter for date
   DateTime? get date => null;
 
@@ -30,11 +31,6 @@ class _CreateEvent extends State<Event>{
 
   // Variable Declarations
   // late CalendarFormat _calendarFormat = CalendarFormat.month;
-  late DateTime dateTime = DateTime.now();
-  late DateTime _focusedDay = DateTime.now();
-  late DateTime _selectedDay = _focusedDay;
-  DateTime currentDate = DateTime.now();
-  DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
   TimeOfDay current_time = TimeOfDay.now();
 
 
@@ -42,22 +38,6 @@ class _CreateEvent extends State<Event>{
   get db => null;
   get hours => null;
   get minutes => null;
-
-
-  // Event List Declaration
-  late final ValueNotifier<List<Event>> _selectedEvents;
-  List<Event> eList = [];
-
-  // method to return all events on a given day
-  // List<Event> _getEventsForDay () {
-  //   List<Event> list = <Event>[];
-  //   for (Event e in eList) {
-  //     if (DateUtils.isSameDay(e.date, viewedDate)){
-  //       list.add(e);
-  //     }
-  //   }
-  //   return list;
-  // }
 
   String error = "";
   bool check1 = false;
@@ -70,10 +50,15 @@ class _CreateEvent extends State<Event>{
   String input_comment = "";
   String cid = "";
   String db_time = DateFormat.jm().format(DateTime.now());
-  //final DateTime date;
-  //final String state;
-  Color color = Colors.blue;
-  //Event(this.date, this.state);
+
+  late DateTime dateTime;
+
+  @override
+  void initState() {
+    super.initState();
+
+    dateTime = widget.selectedDay;
+  }
 
 
   //@override
@@ -83,8 +68,8 @@ class _CreateEvent extends State<Event>{
     User_Database db = User_Database();
 
     // declaring date variables for date dropdown
-    DateTime selectedDate = DateTime.now();
-    String formattedDate = DateFormat('MM/dd/yyyy').format(selectedDate);
+    String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+    dateInput.text = formattedDate;
 
     String formattedTime = current_time.format(context);
     timeInput.text = formattedTime;
@@ -106,7 +91,7 @@ class _CreateEvent extends State<Event>{
               children: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Schedule()));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Schedule(selectedDay: dateTime,)));
                   },
                   style: TextButton.styleFrom(
                       primary: Colors.grey,
@@ -120,7 +105,7 @@ class _CreateEvent extends State<Event>{
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Event(DateTime.now())));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Event(selectedDay: dateTime,)));
                   },
                   style: TextButton.styleFrom(
                       minimumSize: const Size(150, 30),
@@ -173,7 +158,7 @@ class _CreateEvent extends State<Event>{
                     setState(() {
                       //for rebuilding the ui
                       // display new selected date
-                      formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+                      formattedDate = DateFormat('MM/dd/yyyy').format(pickedDate);
                       dateInput.text = formattedDate;
                       // updated dateTime
                       dateTime = DateTime(

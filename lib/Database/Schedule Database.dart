@@ -19,7 +19,7 @@ class User_Database {
 
   // Write to database - Notes are the plans created by the users
   // Contains: title, body, time, reminder, and repeat
-  void add_note({required String body, required bool remind, required bool repeat, required String title, required DateTime time}) {
+  void add_note({required String description, required bool remind, required bool repeat, required String title, required DateTime date}) {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
@@ -30,7 +30,7 @@ class User_Database {
           // .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
           .collection('Schedules')
           .doc('Plan').collection('Plans')
-          .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
+          .add({'description': description, 'remind': remind, 'repeat': repeat, 'title': title, 'date': date, 'titleSearch': titleSearchParam(title: title), 'completed': false});
     }
   }
 
@@ -162,8 +162,8 @@ class User_Database {
       return users.doc(user.uid)
           .collection('Schedules')
           .doc('Plan').collection('Plans')
-          .where('time', isGreaterThanOrEqualTo: planTime)
-          .where('time', isLessThan: getBeginningOfNextDay(planTime))
+          .where('date', isGreaterThanOrEqualTo: planTime)
+          .where('date', isLessThan: getBeginningOfNextDay(planTime))
           .snapshots();
     }
   }
@@ -210,6 +210,7 @@ class User_Database {
   getAllUsers() {
     return users.snapshots();
   }
+
   get_upcoming_Events(){
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
@@ -285,6 +286,28 @@ class User_Database {
     }
   }
 
+  checkCompareRequests() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null){
+      return users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Requests').collection('Compares').snapshots();
+    }
+  }
+
+  checkAcceptCompare() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null){
+      return users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Requests').collection('Accepted Compare').snapshots();
+    }
+  }
+
   void add_request({required QueryDocumentSnapshot request}) {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
@@ -294,6 +317,12 @@ class User_Database {
      users.doc(user.uid)
          .collection('Schedules')
          .doc('Event').collection('InvitedEvents').add({'userId': request.get('userId'), 'eventId': request.get('eventId'), 'eventDate': request.get('eventDate')});
+
+     /*
+     users.doc(request.get('userId'))
+          .collection('Schedules')
+          .doc('Requests').collection('Accepted Event').add({'userId': user.uid});
+     */
 
       update_event_invitation(userId: request.get('userId'), eventId: request.get('eventId'));
       remove_request(id: request.id);
@@ -309,6 +338,61 @@ class User_Database {
       users.doc(user.uid)
           .collection('Schedules')
           .doc('Requests').collection('Requests')
+          .doc(id).delete();
+    }
+  }
+
+  void compare_request({required String userId, required int month}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    // If their is a user currently logged in, add a new document for an
+    // event the user was invited to
+    if (user != null) {
+      users.doc(userId)
+          .collection('Schedules')
+          .doc('Requests')
+          .collection('Compares')
+          .add({'userId': user.uid, 'month': month});
+    }
+  }
+
+  void accept_compare_request({required QueryDocumentSnapshot request}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      print("Request Accepted");
+      users.doc(request.get('userId'))
+          .collection('Schedules')
+          .doc('Requests').collection('Accepted Compare').add({'userId': user.uid, 'month': request.get('month')});
+
+      remove_request(id: request.id);
+    }
+  }
+
+  void remove_compare_request({required String id}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      print("Request Removed");
+      users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Requests').collection('Compares')
+          .doc(id).delete();
+    }
+  }
+
+  void remove_accepted_compare_request({required String id}) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      print("Request Removed");
+      users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Requests').collection('Accepted Compare')
           .doc(id).delete();
     }
   }

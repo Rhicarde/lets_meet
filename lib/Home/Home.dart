@@ -23,6 +23,8 @@ class _Home extends State<Home>{
   User_Database db = User_Database();
   FirebaseAuth auth = FirebaseAuth.instance;
 
+  List<Pair> months = [Pair('Jan', 1), Pair('Feb', 2), Pair('Mar', 3), Pair('Apr', 4), Pair('May', 5), Pair('Jun', 6), Pair('Jul', 7), Pair('Aug', 8), Pair('Sep', 9), Pair('Oct', 10), Pair('Nov', 11), Pair('Dec', 12)];
+
   DateTime viewedDate = DateUtils.dateOnly(DateTime.now());
   var dateFormat = DateFormat('MMMM dd');
 
@@ -38,7 +40,9 @@ class _Home extends State<Home>{
   }
 
   int index = 0;
+  int index_month = 0;
   String userId = '';
+  int month = 1;
   @override
   Widget build(BuildContext context) {
     User? user = auth.currentUser;
@@ -75,7 +79,7 @@ class _Home extends State<Home>{
           child: const Icon(Icons.add),
           onPressed: () {
             Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => Schedule()));
+                MaterialPageRoute(builder: (context) => Schedule(selectedDay: DateTime.now(),)));
           }
       ),
       // Contains weather, text, schedule, and events in a column
@@ -121,37 +125,86 @@ class _Home extends State<Home>{
 
                                       if (user != null) {
                                         list!.removeWhere((accounts) => accounts.a == user.uid);
+                                        userId = list.first.a;
                                       }
 
                                       return StatefulBuilder(
                                       builder: (BuildContext context, StateSetter dropdownState) {
                                         return AlertDialog(
                                           title: const Text(
-                                              "Select User"),
-                                          content: DropdownButton(
-                                            value: list![index].a,
-                                            isExpanded: true,
-                                            items: list.map<DropdownMenuItem<String>>((value) {
-                                              return DropdownMenuItem<String>(
-                                                value: value.a,
-                                                child: Text('${value.b}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (Object? value) {
-                                              dropdownState(() {
-                                                index = list.indexWhere((element) => element.a == value!);
-                                                userId = value.toString();
-                                              });
-                                            },
+                                              "Compare Schedule"),
+                                          content: SizedBox(
+                                            height: 150,
+                                            child: Column (
+                                              children: [
+                                                Row(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [const Text('Select User')]),
+                                                DropdownButton(
+                                                  value: list![index].a,
+                                                  isExpanded: true,
+                                                  items: list.map<DropdownMenuItem<String>>((value) {
+                                                    return DropdownMenuItem<String>(
+                                                      value: value.a,
+                                                      child: Text('${value.b}'),
+                                                    );
+                                                  }).toList(),
+                                                  onChanged: (Object? value) {
+                                                    dropdownState(() {
+                                                      index = list.indexWhere((element) => element.a == value!);
+                                                      userId = value.toString();
+                                                    });
+                                                  },
+                                                ),
+                                                Row(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [const Text('Select Month')]),
+                                                DropdownButton(
+                                                    value: months[index_month].a,
+                                                    items: months.map<DropdownMenuItem<String>>((value) {
+                                                      return DropdownMenuItem<String>(
+                                                        value: value.a,
+                                                        child: Text('${value.a}'),
+                                                      );
+                                                    }).toList(),
+                                                  onChanged: (Object? value) {
+                                                      dropdownState(() {
+                                                        index_month = months.indexWhere((element) => element.a == value!);
+                                                        month = months[index_month].b;
+                                                      });
+                                                },)
+                                              ]
+                                            ),
                                           ),
                                           actions: [
                                             TextButton(
                                                 onPressed: () {
-                                                  // TODO: ADD FUNCTIONALITY FOR COMPARE SCHEDULE HERE
+                                                  print(month);
+                                                  // Send compare request
+                                                  db.compare_request(userId: userId, month: month);
 
+                                                  // Reset selection
+                                                  index_month = 0;
+                                                  index = 0;
+                                                  userId = list.first.a;
+                                                  month = 1;
+
+                                                  // Removes alert
                                                   Navigator.of(context).pop();
                                                 },
                                                 child: const Text("Compare")),
+                                            TextButton(
+                                                onPressed: () {
+                                                  // Reset selection
+                                                  index_month = 0;
+                                                  index = 0;
+                                                  userId = list.first.a;
+                                                  month = 1;
+
+                                                  // Removes alert
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("Cancel")),
                                           ],
                                         );
                                       }

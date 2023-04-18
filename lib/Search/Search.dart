@@ -1,10 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_search_bar/easy_search_bar.dart';
 import '../Database/Schedule Database.dart';
-import '../Login/Auth.dart';
-import '../Login/ProfileVerification.dart';
 import 'DisplaySearch.dart';
 
 //creating the MyHomePage class for the search
