@@ -14,7 +14,7 @@ import '../../Shared/constants.dart';
 class EventInvitation extends StatefulWidget {
 
   // Create event invitation variables
-  final QueryDocumentSnapshot event;
+  final DocumentReference event;
   const EventInvitation({required this.event});
   _EventInvitation createState() => _EventInvitation();
 }
@@ -34,6 +34,12 @@ class _EventInvitation extends State<EventInvitation> {
   @override
   Widget build(BuildContext context) {
     User? user = auth.currentUser;
+
+    Timestamp dateTime = Timestamp.now();
+
+    widget.event.get().then((value) {
+      dateTime = value.get('date');
+    });
 
     // Creates the UI structure of the page
     return Scaffold(
@@ -79,7 +85,7 @@ class _EventInvitation extends State<EventInvitation> {
                                 icon: icon,
                                 onPressed: () {
                                   setState(() {
-                                    db.addEventuser(eventId: widget.event.id, userId: value.a, eventDate: widget.event.get('date'));
+                                    db.addEventuser(eventId: widget.event.id, userId: value.a, eventDate: dateTime);
                                   });
                                 },
                               ),

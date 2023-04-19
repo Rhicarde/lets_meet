@@ -211,12 +211,15 @@ class User_Database {
     return users.snapshots();
   }
 
-  get_upcoming_Events(){
+  get_upcoming_Events({required DateTime date}){
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
     if(user != null){
-      return users.doc(user.uid).collection('Schedules').doc('Event').collection('Event').snapshots();
+      return users.doc(user.uid)
+          .collection('Schedules').doc('Event')
+          .collection('Event')
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(date)).snapshots();
     }
   }
 
@@ -231,9 +234,29 @@ class User_Database {
           .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(eventDate))
           .where('date', isLessThan: Timestamp.fromDate(getBeginningOfNextDay(eventDate)))
           .snapshots();
-      //final invitedEvents = users.doc(user.uid).collection('Schedules').doc('Event').
     }
   }
+
+  getInvitedEvents(DateTime eventDate) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if(user != null){
+      QuerySnapshot invitedSnapshot = await users.doc(user.uid).collection('Schedules').doc('Event').collection('InvitedEvents')
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(eventDate))
+          .where('date', isLessThan: Timestamp.fromDate(getBeginningOfNextDay(eventDate))).get();
+
+      List<DocumentReference> invitedEvents = [];
+
+      invitedSnapshot.docs.forEach((doc) async {
+        var temp = await users.doc(doc.get('userId')).collection('Schedules').doc('Event').collection('Event').doc(doc.get('eventId'));
+        invitedEvents.add(temp);
+      });
+
+      return invitedEvents;
+    }
+  }
+
   // Kieran King
   // Creates a document with the given event id and the owner of the event's
   // user ID for easy invitation implementation in the future
@@ -270,7 +293,44 @@ class User_Database {
     if (user != null) {
       users.doc(user.uid)
           .collection('Schedules')
+          .doc('Event').collection('Event').doc(id).get().then((value) async {
+            List<String> invitedUsers = value.get('userIds');
+            for (String i in invitedUsers) {
+              var collection = await users.doc(i).collection('Schedule').doc('Event').collection('InvitedEvents').where('eventId' == id).get();
+               for (var doc in collection.docs) {
+                 await doc.reference.delete();
+               }
+            }
+      });
+      
+      users.doc(user.uid)
+          .collection('Schedules')
           .doc('Event').collection('Event')
+          .doc(id).delete();
+    }
+  }
+
+  Future<void> remove_invited_event({required String userId, required String eventId, required String id}) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      DocumentSnapshot<Map<String, dynamic>> qSnapshot = await users.doc(userId)
+          .collection('Schedules').doc('Event').collection('Event').doc(eventId).get();
+
+      List<dynamic> usersList = qSnapshot.get('userIds');
+
+      if (usersList.isNotEmpty) {
+        int index = usersList.indexWhere((element) => element == user.uid);
+        usersList.removeAt(index);
+      }
+
+      users.doc(userId)
+          .collection('Schedules').doc('Event').collection('Event').doc(eventId).update({'userIds': usersList});
+
+      users.doc(user.uid)
+          .collection('Schedules')
+          .doc('Event').collection('InvitedEvents')
           .doc(id).delete();
     }
   }
@@ -397,7 +457,7 @@ class User_Database {
     }
   }
 
-  Future<void> update_event_invitation({required String userId, required String eventId}) async {
+  update_event_invitation({required String userId, required String eventId}) async {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
@@ -420,6 +480,27 @@ class User_Database {
       }
 
       users.doc(userId)
+          .collection('Schedules').doc('Event').collection('Event').doc(eventId).update({'userIds': usersList});
+    }
+  }
+
+  remove_event_invitation({required String userId, required String eventId}) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      print("Event Invitees List Being Updated");
+      DocumentSnapshot<Map<String, dynamic>> qSnapshot = await users.doc(user.uid)
+          .collection('Schedules').doc('Event').collection('Event').doc(eventId).get();
+
+      List<dynamic> usersList = qSnapshot.get('userIds');
+
+      if (usersList.isNotEmpty) {
+        int index = usersList.indexWhere((element) => element == userId);
+        usersList.removeAt(index);
+      }
+
+      users.doc(user.uid)
           .collection('Schedules').doc('Event').collection('Event').doc(eventId).update({'userIds': usersList});
     }
   }

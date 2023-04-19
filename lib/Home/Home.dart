@@ -261,7 +261,7 @@ class _Home extends State<Home>{
                       if (newDate == null) return;
                       setState(() => viewedDate = DateUtils.dateOnly(newDate));
                     },
-                    icon: Text('${dateFormat.format(viewedDate)}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    icon: Text('${dateFormat.format(viewedDate)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                     color: Colors.black,
                     iconSize: 50,
                   ),

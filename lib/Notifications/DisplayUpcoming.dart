@@ -46,7 +46,7 @@ class ReadUpcoming extends State<DisplayUpcoming> {
           ]
       ),
       body: StreamBuilder(
-        stream: db.get_upcoming_Events(), //getting events from the database
+        stream: db.get_upcoming_Events(date: DateTime.now()), //getting events from the database
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return ListView();

@@ -45,7 +45,7 @@ class ReadSearch extends State<DisplaySearch> {
                 List<GestureDetector> eventList = Eventsnapshot.data!.docs.map((search) {
                   return GestureDetector(
                     key: Key(search.get('title')),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search))),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search.reference))),
                     child: Card(
                         elevation: 4,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -83,7 +83,7 @@ class ReadSearch extends State<DisplaySearch> {
                 List<GestureDetector> searchList = snapshot.data!.docs.map((search) {
                   return GestureDetector(
                     key: Key(search.get('title')),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search))),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search.reference))),
                     child: Card(
                         elevation: 4,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -112,7 +112,7 @@ class ReadSearch extends State<DisplaySearch> {
               List<GestureDetector> eventList = Eventsnapshot.data!.docs.map((search) {
                 return GestureDetector(
                   key: Key(search.get('title')),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search))),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventDetail(event: search.reference))),
                   child: Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

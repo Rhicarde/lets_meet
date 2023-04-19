@@ -9,7 +9,7 @@ import 'EventInvitation.dart';
 import 'package:lets_meet/Scheduling/Events/EventEditScreen.dart';
 
 class DisplayEventDetail extends StatefulWidget {
-  final QueryDocumentSnapshot event;
+  final DocumentReference event;
 
   const DisplayEventDetail({Key? key, required this.event}) : super(key: key);
 
@@ -30,13 +30,26 @@ class EventDetail extends State<DisplayEventDetail> {
   Widget build(BuildContext context) {
     User_Database db = User_Database();
 
-    _titleTextController.text = widget.event.get('title');
-    _bodyTextController.text = widget.event.get('description');
-    _locationTextController.text = widget.event.get('location');
-    timeInput.text = widget.event.get('time');
-
     // Get Timestamp from Firebase and Convert to DateTime
-    DateTime dateTime = widget.event.get('date').toDate();
+    DateTime dateTime = DateTime.now();
+
+    bool remind = false;
+    bool repeat = false;
+
+    List<dynamic> comments = [];
+    List<dynamic> userIds = [];
+
+    widget.event.get().then((value) {
+      _titleTextController.text = value.get('title');
+      _bodyTextController.text = value.get('description');
+      _locationTextController.text = value.get('location');
+      timeInput.text = value.get('time');
+      dateTime = value.get('date').toDate();
+      remind = value.get('remind');
+      repeat = value.get('repeat');
+      comments = value.get('comments');
+      userIds = value.get('userIds');
+    });
 
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');
@@ -45,9 +58,6 @@ class EventDetail extends State<DisplayEventDetail> {
     dateInput.text = formattedDate;
     TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
 
-    bool remind = widget.event.get('remind');
-    bool repeat = widget.event.get('repeat');
-
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
@@ -55,7 +65,7 @@ class EventDetail extends State<DisplayEventDetail> {
       appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
-          title: Text(widget.event.get('title'),
+          title: Text(_titleTextController.text,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           leading: Builder(
             builder: (BuildContext context) {
@@ -79,7 +89,7 @@ class EventDetail extends State<DisplayEventDetail> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               buildHeader(context),
-              for (String user in widget.event.get('userIds'))
+              for (String user in userIds)
                 FutureBuilder(
                     future: db.get_user_name(userId: user),
                     builder: (BuildContext context, AsyncSnapshot<Object?> profile) {
@@ -191,7 +201,7 @@ class EventDetail extends State<DisplayEventDetail> {
                                     fontWeight: FontWeight.bold, // add bold font weight
                                   ),
                                 ),
-                                for (var comment in widget.event.get('comments'))
+                                for (var comment in comments)
                                   Text(
                                     comment,
                                     style: TextStyle(fontSize: 16),
