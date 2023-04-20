@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 
 class OptimalDeparture extends StatefulWidget {
   final QueryDocumentSnapshot event;
@@ -16,6 +19,10 @@ class OptimalDeparture extends StatefulWidget {
 class _OptimalDeparture extends State<OptimalDeparture> {
   String? _currentAddress;
   Position? _currentPosition;
+  String? duration;
+  //current time
+  DateTime _currentTime = DateTime.now();
+
 
   // Request Location Service Permission from User
   Future<bool> _handleLocationPermission() async {
@@ -76,12 +83,42 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     });
   }
 
+  // travel disatnce and time between user and event location
+  Future<void> getDistance(
+      double originLat, double originLng,
+      double destinationLat, double destinationLng) async {
+    final apiKey = 'AIzaSyDtcUVpzGuSUjmH9q-sA2LJSrbwTYVeeNs';
+    final apiUrl =
+        'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=$originLat,$originLng&destinations=$destinationLat,$destinationLng&key=$apiKey';
+
+    final response = await http.get(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      // Parse the JSON response and extract the distance and duration
+      final data = jsonDecode(response.body);
+      //final distance = data['rows'][0]['elements'][0]['distance']['text'];
+      duration = data['rows'][0]['elements'][0]['duration']['text'];
+    } else {
+      print('Failed to get distance');
+    }
+  }
+
+  Future<void> calculateODT() async {
+    // Wait for the current position to be obtained
+    await _getCurrentPosition();
+
+    // Get the distance and time between the user's current position and the event location
+    await getDistance(
+        _currentPosition!.latitude, _currentPosition!.longitude,
+        33.791180, -118.140140);
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
-    // current time
-    DateTime _currentTime = DateTime.now();
 
     // getting time of event
     String _eventTime = widget.event.get('time') ?? 'N/A';
@@ -96,8 +133,20 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     // get placeid of events
     String _dbplaceID = widget.event.get("placeid");
 
+    // calling function to get the user's location
+    //_getCurrentPosition();
+
+    // calculate how long it takes to get from current address to event address
+    // subtract that time from the event time to get ODT
+
+
+
+
+    calculateODT();
+    //getDistance(_currentAddress!, _dbEventLocation);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Location Page")),
+      appBar: AppBar(title: const Text("Optimal Departure Time")),
       body: SafeArea(
         child: Center(
           child: Column(
@@ -107,14 +156,11 @@ class _OptimalDeparture extends State<OptimalDeparture> {
               Text('Event Date and Time: $_eventDateTime' "\n", style: TextStyle(fontSize: 18)),
               Text('Event Location as String: $_dbEventLocation' "\n", style: TextStyle(fontSize: 18)),
               Text('Event Location as PlaceID: $_dbplaceID' '\n', style: TextStyle(fontSize: 18)),
-              Text('LAT: ${_currentPosition?.latitude ?? ""}'),
-              Text('LNG: ${_currentPosition?.longitude ?? ""}'),
-              Text('ADDRESS: ${_currentAddress ?? ""}'),
+              Text('User LAT: ${_currentPosition?.latitude ?? ""}'),
+              Text('User LNG: ${_currentPosition?.longitude ?? ""}'),
+              Text('User ADDRESS: ${_currentAddress ?? ""}'),
+              Text('Leave at: $duration'),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _getCurrentPosition,
-                child: const Text("Get Current Location"),
-              )
             ],
           ),
         ),
