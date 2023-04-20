@@ -6,6 +6,7 @@ import 'package:lets_meet/Scheduling/compare_Schedule.dart';
 
 import '../../Database/Schedule Database.dart';
 
+// Creates a side screen that displays all requests
 class RequestMenu extends StatefulWidget {
   RequestMenu({Key? key}) : super(key: key);
 
@@ -13,10 +14,13 @@ class RequestMenu extends StatefulWidget {
 }
 
 class _RequestMenu extends State<RequestMenu> {
+  // Initialize database
   User_Database db = User_Database();
 
+  // Builds screen
   @override
   Widget build(BuildContext context) {
+    // Stream builder collects data for event requests
     return StreamBuilder(
         stream: db.checkRequests(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> event_snapshot) {
@@ -24,6 +28,7 @@ class _RequestMenu extends State<RequestMenu> {
             return Drawer(child: SizedBox(height: double.maxFinite, child: ListView()));
           }
           else if (event_snapshot.hasData) {
+            // Stream builder collects data for compare schedule requests
             return StreamBuilder(
               stream: db.checkCompareRequests(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> compare_snapshot) {
@@ -31,6 +36,7 @@ class _RequestMenu extends State<RequestMenu> {
                   return Drawer(child: SizedBox(height: double.maxFinite, child: ListView()));
                 }
                 else if (compare_snapshot.hasData) {
+                  // Stream builder collects data on accepted compare requests
                   return StreamBuilder(
                     stream: db.checkAcceptCompare(),
                     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> accept_snapshot) {
@@ -54,6 +60,7 @@ class _RequestMenu extends State<RequestMenu> {
                           return buildAcceptCompareItem(context, request);
                         }).toList();
 
+                        // Combines all requests into one list for display
                         for (var c in compare) {
                           request.add(c);
                         }
@@ -87,6 +94,7 @@ class _RequestMenu extends State<RequestMenu> {
         });
   }
 
+  // Side screen header widget
   Widget buildHeader(BuildContext context) => Container(
     color: Colors.blue,
     padding: EdgeInsets.only(
@@ -103,6 +111,7 @@ class _RequestMenu extends State<RequestMenu> {
     ),
   );
 
+  // Builds widget for event requests
   Widget buildEventItem(BuildContext context, QueryDocumentSnapshot<Object?> request) => Container(
     padding: const EdgeInsets.all(10),
     child: Wrap(
@@ -166,6 +175,7 @@ class _RequestMenu extends State<RequestMenu> {
     ),
   );
 
+  // Builds widget for compare requests
   Widget buildCompareItem(BuildContext context, QueryDocumentSnapshot<Object?> request) => Container(
     padding: const EdgeInsets.all(10),
     child: Wrap(
@@ -218,6 +228,7 @@ class _RequestMenu extends State<RequestMenu> {
     ),
   );
 
+  // Builds widdget for accepted compare requests
   Widget buildAcceptCompareItem(BuildContext context, QueryDocumentSnapshot<Object?> request) => Container(
     padding: const EdgeInsets.all(10),
     child: Wrap(
@@ -270,6 +281,7 @@ class _RequestMenu extends State<RequestMenu> {
   );
 }
 
+// Converts int value to corresponding month name
 convert_month(int month) {
   List<String> months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
