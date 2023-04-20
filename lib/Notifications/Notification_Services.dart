@@ -1,24 +1,37 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:lets_meet/Database/Schedule%20Database.dart';
 
-class ShowNotification extends StatelessWidget {
+class ShowNotification extends StatefulWidget {
   const ShowNotification({Key? key}) : super(key: key);
 
-  //creates a button to show notifications
   @override
-  Widget build(BuildContext context) {
+  State<ShowNotification> createState() => _ShowNotificationState();
+
+}
+class _ShowNotificationState extends State<ShowNotification>{
+  User_Database db = User_Database();
+  @override
+  Widget build(BuildContext context){
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+    DateTime dateNow = DateTime.now();
+    DateTime eventDate = db.getDate();
+
     return Scaffold(
       body: Center(
         child: ElevatedButton(
-          child: Text('show notification'), //a button to receive a notification
+          child: const Text('show notification'), //a button to receive a notification
           onPressed: () async {
-            notificationAlert();
+            //notificationAlert();
+            //const DisplayDate();
           },
         ),
       ),
     );
   }
-
   notificationAlert() async {
     //local notifications plugin object
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -57,9 +70,8 @@ class ShowNotification extends StatelessWidget {
             channel.id,
             channel.name,
             channelDescription: channel.description),
-      ),
+    ),
     );
   }
 }
-
 

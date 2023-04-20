@@ -3,13 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lets_meet/Scheduling/Event.dart';
-import 'package:lets_meet/Scheduling/EventDetail.dart';
-import '../Database/Schedule Database.dart';
-import '../Shared/constants.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Shared/constants.dart';
 
 class DisplayEventEdit extends StatefulWidget {
-  final QueryDocumentSnapshot event;
+  final DocumentReference event;
 
   const DisplayEventEdit({Key? key, required this.event}) : super(key: key);
 
@@ -30,23 +28,29 @@ class EventEdit extends State<DisplayEventEdit> {
   Widget build(BuildContext context) {
     User_Database db = User_Database();
 
-    _titleTextController.text = widget.event.get('title');
-    _bodyTextController.text = widget.event.get('description');
-    _locationTextController.text = widget.event.get('location');
-    timeInput.text = widget.event.get('time');
-    _commentTextController.text = widget.event.get('comments').join('\n');
-
     // Get Timestamp from Firebase and Convert to DateTime
-    DateTime dateTime = widget.event.get('date').toDate();
+    DateTime dateTime = DateTime.now();
+
+    bool remind = false;
+    bool repeat = false;
+
+    widget.event.get().then((value) {
+      _titleTextController.text = value.get('title');
+      _bodyTextController.text = value.get('description');
+      _locationTextController.text = value.get('location');
+      timeInput.text = value.get('time');
+      _commentTextController.text = value.get('comments').join('\n');
+      dateTime = value.get('date').toDate();
+      remind = value.get('remind');
+      repeat = value.get('repeat');
+    });
+
     final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
     final minutes = dateTime.minute.toString().padLeft(2, '0');
 
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
     dateInput.text = formattedDate;
     TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
-
-    bool remind = widget.event.get('remind');
-    bool repeat = widget.event.get('repeat');
 
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
@@ -56,7 +60,7 @@ class EventEdit extends State<DisplayEventEdit> {
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             centerTitle: Theme.of(context).appBarTheme.centerTitle,
             title: Text(
-              widget.event.get('title'),
+              _titleTextController.text,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             actions: const <Widget>[]
@@ -155,11 +159,16 @@ class EventEdit extends State<DisplayEventEdit> {
 
                 // Update the screen with the new field values
                 setState(() {
-                  widget.event.get('comments')['title'] = title;
-                  widget.event.get('description')['description'] = description;
-                  widget.event.get('location')['location'] = location;
-                  widget.event.get('time')['time'] = time;
-                  widget.event.get('comments')['comments'] = comments;
+                  Map<String,dynamic> data = {
+                    'title' : title,
+                    'description' : description,
+                    'location' : location,
+                    'time' : time,
+                    'comments' : comments
+                  };
+
+                  widget.event.update(data);
+                  Navigator.of(context).pop();
                 });
 
               },

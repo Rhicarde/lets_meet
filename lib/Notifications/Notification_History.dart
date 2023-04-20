@@ -1,93 +1,90 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../Shared/constants.dart';
 
+//displaying notification history and creating a key
 class DisplayNotificationHistory extends StatefulWidget {
-
-  //creating the DisplayNotificationHistory class
-  final Function? toggleView;
-  DisplayNotificationHistory({this.toggleView});
-
-  _DisplayNotificationHistory createState() => _DisplayNotificationHistory();
+  final QueryDocumentSnapshot event;
+  const DisplayNotificationHistory({Key? key, required this.event}) : super(key: key);
+  @override
+  NotificationHistory createState() => NotificationHistory();
 }
 
-class _DisplayNotificationHistory extends State<DisplayNotificationHistory>{
-
-  //initializing the starting variables
-  int index = 0;
-  bool _checked = false;
+//getting the notification history from the database
+class NotificationHistory extends State<DisplayNotificationHistory> {
+  final _titleTextController = TextEditingController();
+  final _bodyTextController = TextEditingController();
+  final _locationTextController = TextEditingController();
+  TextEditingController dateInput = TextEditingController();
+  TextEditingController timeInput = TextEditingController();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    //creating the body for a page
-    body: <Widget> [
-      Column(
-          children: [
-            //creating a list of notifications that can range from recent to future dates
-            CheckboxListTile( //notification
-                title: const Text("Eat at 2PM with friend on Tuesday 2/14/23"),
-                secondary: Icon(Icons.checklist),
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _checked, //setting the checkbox for user and seeing if its checked
-                onChanged: (bool? value) {
-                  setState(() {
-                    _checked = value!;
-                  });
-                }),
-            CheckboxListTile( //notification
-                title: const Text("Do homework at 6PM on Wednesday 2/15/23"),
-                secondary: Icon(Icons.checklist),
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _checked, //setting the checkbox for user and seeing if its checked
-                onChanged: (bool? value) {
-                  setState(() {
-                    _checked = value!;
-                  });
-                }),
-            CheckboxListTile( //notification
-                title: const Text("Hangout with family at 8PM on Thursday 2/16/23"),
-                secondary: Icon(Icons.checklist),
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _checked, //setting the checkbox for user and seeing if its checked
-                onChanged: (bool? value) {
-                  setState(() {
-                    _checked = value!;
-                  });
-                }),
-            CheckboxListTile( //notification
-                title: const Text("Go buy groceries at 3PM on Friday 2/17/23"),
-                secondary: Icon(Icons.checklist),
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _checked, //setting the checkbox for user and seeing if its checked
-                onChanged: (bool? value) {
-                  setState(() {
-                    _checked = value!;
-                  });
-                }),
-            CheckboxListTile( //notification
-                title: const Text("Hangout with friends at 9PM on Saturday 2/18/23"),
-                secondary: Icon(Icons.checklist),
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _checked, //setting the checkbox for user and seeing if its checked
-                onChanged: (bool? value) {
-                  setState(() {
-                    _checked = value!;
-                  });
-                }),
-            CheckboxListTile( //notification
-                title: const Text("Watch basketball game 6PM on Sunday 2/19/23"),
-                secondary: Icon(Icons.checklist),
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _checked, //setting the checkbox for user and seeing if its checked
-                onChanged: (bool? value) {
-                  setState(() {
-                    _checked = value!;
-                  });
-                })
-          ]
-      ),
-    ][index],
-  );
+  //getting the information from events
+  Widget build(BuildContext context) {
+    _titleTextController.text = widget.event.get('title');
+    _bodyTextController.text = widget.event.get('description');
+    _locationTextController.text = widget.event.get('location');
+    timeInput.text = widget.event.get('time');
+
+    //getting the date from events to convert to the type DateTime
+    DateTime dateTime = widget.event.get('date').toDate();
+    String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+    dateInput.text = formattedDate;
+
+    return Scaffold(
+        appBar: AppBar(
+            title: const Text("Notification History",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
+                color: Colors.white)
+            ),
+            actions: const <Widget>[]
+        ),
+
+        //format of the notifications history
+        body: SingleChildScrollView(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _titleTextController, //title editor
+                  decoration: textInputDecoration.copyWith(hintText: 'Title'),
+                  readOnly: true,
+                  style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
+                TextFormField(
+                  controller: _bodyTextController, //description editor
+                  decoration: textInputDecoration.copyWith(hintText: 'Description'),
+                  readOnly: true,
+                  style: const TextStyle(fontSize: 16),
+                  maxLines: 20,
+                ),
+                TextFormField(
+                  controller: _locationTextController, //location editor
+                  decoration: textInputDecoration.copyWith(hintText: 'Location'),
+                  readOnly: true,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                TextFormField(
+                    controller: timeInput,
+                    decoration: const InputDecoration(
+                        icon: Icon(Icons.access_time_outlined), //picture icon
+                    ),
+                    readOnly: true,
+                    style: const TextStyle(fontSize: 20),
+                ),
+                TextFormField(
+                    controller: dateInput,
+                    decoration: const InputDecoration(
+                        icon: Icon(Icons.calendar_today), //picture icon
+                    ),
+                    readOnly: true,
+                    style: const TextStyle(fontSize: 20),
+                    ),
+                const SizedBox(height: 10, width: 10,), //size of the box
+              ],
+            )
+        ));
+  }
 }
-
-
-

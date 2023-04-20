@@ -1,74 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../Database/Schedule Database.dart';
-import '../Login/Authentication/validator.dart';
-import 'package:lets_meet/Scheduling/Event.dart';
-import '../Shared/constants.dart';
+import '../../Database/Schedule Database.dart';
+import '../../Login/Authentication/validator.dart';
+import 'package:lets_meet/Scheduling/Events/Event.dart';
+import '../../Shared/constants.dart';
 
+// Screen to add info on a new plan
 class Schedule extends StatefulWidget {
+  final DateTime selectedDay;
 
   final Function? toggleView;
-  Schedule({this.toggleView});
+  Schedule({this.toggleView, required this.selectedDay});
 
   _CreateSchedule createState() => _CreateSchedule();
 }
 
 class _CreateSchedule extends State<Schedule> {
+  // Controller to get text for title and description of plan
+  final _titleTextController = TextEditingController();
+  final _bodyTextController = TextEditingController();
+  // Controllers to manage date and time
   TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
 
-  DateTime dateTime = DateTime.now();
-  DateTime date = DateTime.now().subtract(Duration(days: DateTime
-      .now()
-      .day - 1));
+  DateTime date = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+  TimeOfDay current_time = TimeOfDay.now();
+
+  late DateTime dateTime;
 
   @override
   void initState() {
     super.initState();
+
+    dateTime = widget.selectedDay;
   }
 
   String error = "";
 
-  final _titleTextController = TextEditingController();
-  final _bodyTextController = TextEditingController();
-
+  // Boolean variables to determine notifications
   bool remind = false;
   bool repeat = false;
 
   Widget build(BuildContext context) {
+    // Database for the writes
     User_Database db = User_Database();
 
-    final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
-    final minutes = dateTime.minute.toString().padLeft(2, '0');
-
+    // Date format
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
     dateInput.text = formattedDate;
-    String formattedTime = '$hours:$minutes';
+    // Time format
+    String formattedTime = current_time.format(context);
     timeInput.text = formattedTime;
 
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Theme
-                .of(context)
-                .appBarTheme
-                .backgroundColor,
-            centerTitle: Theme
-                .of(context)
-                .appBarTheme
-                .centerTitle,
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+            centerTitle: Theme.of(context).appBarTheme.centerTitle,
             title: const Text('Lets Plan'),
             actions: const <Widget>[]
         ),
         body: ListView(
           children: [
             const SizedBox(height: 10,),
+            // Button used to navigate between creating a plan or an event
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Schedule()));
+                        MaterialPageRoute(builder: (context) => Schedule(selectedDay: dateTime,)));
                   },
                   style: TextButton.styleFrom(
                       minimumSize: const Size(150, 30),
@@ -82,7 +83,7 @@ class _CreateSchedule extends State<Schedule> {
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(context, MaterialPageRoute(
-                        builder: (context) => Event(DateTime.now())));
+                        builder: (context) => Event(selectedDay: dateTime,)));
                   },
                   style: TextButton.styleFrom(
                       primary: Colors.grey,
@@ -97,10 +98,12 @@ class _CreateSchedule extends State<Schedule> {
               ],
             ),
             const SizedBox(height: 20,),
+            // Text box for title of plan
             TextFormField(
               controller: _titleTextController,
               decoration: textInputDecoration.copyWith(hintText: 'Title'),
             ),
+            // Text box for description of plan
             TextFormField(
               controller: _bodyTextController,
               validator: (value) =>
@@ -109,6 +112,7 @@ class _CreateSchedule extends State<Schedule> {
                   ),
               decoration: textInputDecoration.copyWith(hintText: 'Description'),
             ),
+            // Text box for date - will show calendar
             TextFormField(
                 controller: dateInput,
                 decoration: const InputDecoration(
@@ -132,7 +136,7 @@ class _CreateSchedule extends State<Schedule> {
                     setState(() {
                       //for rebuilding the ui
                       // display new selected date
-                      formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+                      formattedDate = DateFormat('MM/dd/yyyy').format(pickedDate);
                       dateInput.text = formattedDate;
                       // updated dateTime
                       dateTime = DateTime(
@@ -141,6 +145,7 @@ class _CreateSchedule extends State<Schedule> {
                     });
                   });
                 }),
+            // Text box for time - will show calendar
             TextFormField(
               controller: timeInput,
               decoration: const InputDecoration(
@@ -151,25 +156,21 @@ class _CreateSchedule extends State<Schedule> {
               onTap: () async {
                 final time = await showTimePicker(
                     context: context,
-                    initialTime: TimeOfDay(hour: DateTime
-                        .now()
-                        .hour, minute: DateTime
-                        .now()
-                        .minute));
+                    initialTime: TimeOfDay(hour: current_time.hour, minute: current_time.minute));
                 if (time == null) return;
                 setState(() {
                   //for rebuilding the ui
-                  // display new selected time
-                  String formattedTime = '$hours:$minutes';
-                  timeInput.text = formattedTime;
+                  // display new selected time;
+                  timeInput.text = time.format(context);
+                  current_time = time;
                   // updated time
                   dateTime = DateTime(
-                      dateTime.year, dateTime.month, dateTime.day, time.hour,
-                      time.minute);
+                      dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
                 });
               },
             ),
             const SizedBox(height: 20,),
+            // Checkboxes to determine repeation or notification
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -191,15 +192,16 @@ class _CreateSchedule extends State<Schedule> {
                     }),
               ],
             ),
+            // Creation button -> leads to writing to database
             Container(
               child: ElevatedButton(
                   onPressed: () {
                     print(dateTime);
-                    db.add_note(body: _bodyTextController.text,
+                    db.add_note(description: _bodyTextController.text,
                         remind: remind,
                         repeat: repeat,
                         title: _titleTextController.text,
-                        time: dateTime);
+                        date: dateTime);
                     Navigator.pop(context);
                   },
                   child: const Text('Create')),

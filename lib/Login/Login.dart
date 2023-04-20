@@ -3,7 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_meet/Login/Authentication/validator.dart';
-import '../Scheduling/Home.dart';
+import 'package:lets_meet/Login/ProfileVerification.dart';
+import '../Home/Home.dart';
 import 'Authentication/fire_auth.dart';
 import 'ForgotPassword.dart';
 
@@ -45,7 +46,7 @@ class _Login extends State<Login>{
       } else {
         // If logged in, display Home screen
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => Home(),
+          MaterialPageRoute(builder: (context) => ProfileVerification(),
           ),
         );
       }
@@ -191,10 +192,7 @@ class _Login extends State<Login>{
                                             });
 
                                             if (user != null) {
-                                              Navigator.of(context).pushReplacement(
-                                                MaterialPageRoute(builder: (context) => Home(),
-                                                ),
-                                              );
+                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProfileVerification(),),);
                                             }
                                           }
                                         },
