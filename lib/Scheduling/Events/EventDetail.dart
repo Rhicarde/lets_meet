@@ -7,6 +7,8 @@ import '../../Database/Schedule Database.dart';
 import '../../Shared/constants.dart';
 import 'EventInvitation.dart';
 import 'package:lets_meet/Scheduling/Events/EventEditScreen.dart';
+import 'package:lets_meet/Scheduling/OptimalDeparture.dart';
+
 
 class DisplayEventDetail extends StatefulWidget {
   final DocumentReference event;
@@ -60,6 +62,9 @@ class EventDetail extends State<DisplayEventDetail> {
 
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
+
+    // var oDT = new OptimalDeparture(event: widget.event);
+    // calculateODT(_dbEventLocation, _eventDateTime);
 
     return Scaffold(
       appBar: AppBar(
@@ -229,6 +234,15 @@ class EventDetail extends State<DisplayEventDetail> {
                       },
                       child: const Text('Invite a Friend'),
                     ),
+                    TextButton(
+                      onPressed: (){
+                        Navigator.push(
+                        context, MaterialPageRoute(
+                        builder: (context) => OptimalDeparture(event: widget.event),));
+                      },
+                       child: const Text('Optimal Departure Time'),
+
+                    )
                   ]
               ),
             ),

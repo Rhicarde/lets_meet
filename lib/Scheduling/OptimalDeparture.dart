@@ -11,7 +11,8 @@ import 'package:intl/intl.dart';
 
 
 class OptimalDeparture extends StatefulWidget {
-  final QueryDocumentSnapshot event;
+  // change file to DocumentReference
+  final DocumentReference event;
   const OptimalDeparture({Key? key, required this.event}) : super(key: key);
 
 
@@ -25,6 +26,9 @@ class _OptimalDeparture extends State<OptimalDeparture> {
   int? duration;
   DateTime? oDT;
   String? formattedoDT;
+  String _eventTime = '00:00';
+  DateTime _eventDate = DateTime.now();
+  String _eventLocation = 'No location';
   //current time
   DateTime _currentTime = DateTime.now();
 
@@ -103,7 +107,7 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     }
   }
 
-  Future<void> calculateODT(String _eventAddress, DateTime _eventTime) async {
+   Future<void> calculateODT(String _eventAddress, DateTime _eventTime) async {
     // Wait for the current position to be obtained
     await _getCurrentPosition();
 
@@ -119,29 +123,43 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
+    widget.event.get().then((value) {
+      _eventTime = value.get('time');
+      _eventDate = value.get('date').toDate();
+      _eventLocation = value.get('location');
+    });
     // getting time of event
-    String _eventTime = widget.event.get('time') ?? 'N/A';
-    Timestamp _eventDate = widget.event.get('date') ?? 'N/A';
+    // String _eventTime = widget.event.get('time') ?? 'N/A';
+    // Timestamp _eventDate = widget.event.get('date') ?? 'N/A';
+
+
+    // if _eventTime is not in the correct format HH:MM then convert
+
+    // if(DateFormat(_eventTime) != 'HH:mm'){
+    //   final inputString = _eventTime;
+    //   final inputFormat = DateFormat('h:mm a');
+    //   final outputFormat = DateFormat('HH:mm');
+    //   final dateTime = inputFormat.parse(inputString);
+    //   _eventTime = outputFormat.format(dateTime);
+    // }
+
     DateTime _eventDateTime = (_eventDate != 'N/A' && _eventTime != 'N/A')
     // converting eventtime and eventdate to one datetime for calculation
-        ? DateTime(_eventDate.toDate().year, _eventDate.toDate().month, _eventDate.toDate().day, int.parse(_eventTime.split(':')[0]), int.parse(_eventTime.split(':')[1])) : DateTime.now(); // or any default value you want
+        ? DateTime(_eventDate.year, _eventDate.month, _eventDate.day, int.parse(_eventTime.split(':')[0]), int.parse(_eventTime.split(':')[1])) : DateTime.now(); // or any default value you want
 
     // get location of event
-    String _dbEventLocation = widget.event.get('location');
-
-    // get placeid of events
-    String _dbplaceID = widget.event.get("placeid");
-
+    //String _dbEventLocation = widget.event.get('location');
 
     // calculate how long it takes to get from current address to event address
     // subtract that time from the event time to get ODT
-    calculateODT(_dbEventLocation, _eventDateTime);
+    //calculateODT(_dbEventLocation, _eventDateTime);
+    calculateODT(_eventLocation, _eventDateTime);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Optimal Departure Time")),
       body: Center(
           child: Text(
-              'Depart at: \n ${formattedoDT ?? ""}', style: TextStyle(fontSize: 25)),
+              'To Arrive on Time Depart at: \n ${formattedoDT ?? ""}', style: TextStyle(fontSize: 25)),
       ),
     );
   }
