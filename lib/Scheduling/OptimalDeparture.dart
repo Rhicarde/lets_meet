@@ -26,7 +26,7 @@ class _OptimalDeparture extends State<OptimalDeparture> {
   int? duration;
   DateTime? oDT;
   String? formattedoDT;
-  String _eventTime = '00:00';
+  String _eventTime = '00:00 AM';
   DateTime _eventDate = DateTime.now();
   String _eventLocation = 'No location';
   //current time
@@ -115,7 +115,14 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     await getDistance(_currentAddress!, _eventAddress);
     oDT = _eventTime.subtract(Duration(seconds: duration!));
     formattedoDT = DateFormat("HH:mm 'on' EEEE, MMMM d y").format(oDT!);
+  }
 
+  // convert AM/PM to 24 Hour
+  String convertTo24HourFormat(String time) {
+    final format = DateFormat('hh:mm a');
+    final dateTime = format.parse(time);
+    final formatter = DateFormat('HH:mm');
+    return formatter.format(dateTime);
   }
 
   @override
@@ -129,30 +136,15 @@ class _OptimalDeparture extends State<OptimalDeparture> {
       _eventLocation = value.get('location');
     });
     // getting time of event
-    // String _eventTime = widget.event.get('time') ?? 'N/A';
-    // Timestamp _eventDate = widget.event.get('date') ?? 'N/A';
-
-
     // if _eventTime is not in the correct format HH:MM then convert
-
-    // if(DateFormat(_eventTime) != 'HH:mm'){
-    //   final inputString = _eventTime;
-    //   final inputFormat = DateFormat('h:mm a');
-    //   final outputFormat = DateFormat('HH:mm');
-    //   final dateTime = inputFormat.parse(inputString);
-    //   _eventTime = outputFormat.format(dateTime);
-    // }
+    String _convertedTime = convertTo24HourFormat(_eventTime);
 
     DateTime _eventDateTime = (_eventDate != 'N/A' && _eventTime != 'N/A')
     // converting eventtime and eventdate to one datetime for calculation
-        ? DateTime(_eventDate.year, _eventDate.month, _eventDate.day, int.parse(_eventTime.split(':')[0]), int.parse(_eventTime.split(':')[1])) : DateTime.now(); // or any default value you want
-
-    // get location of event
-    //String _dbEventLocation = widget.event.get('location');
+        ? DateTime(_eventDate.year, _eventDate.month, _eventDate.day, int.parse(_convertedTime.split(':')[0]), int.parse(_convertedTime.split(':')[1])) : DateTime.now(); // or any default value you want
 
     // calculate how long it takes to get from current address to event address
     // subtract that time from the event time to get ODT
-    //calculateODT(_dbEventLocation, _eventDateTime);
     calculateODT(_eventLocation, _eventDateTime);
 
     return Scaffold(

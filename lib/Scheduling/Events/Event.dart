@@ -246,7 +246,7 @@ class _CreateEvent extends State<Event>{
                       decoration: InputDecoration(
                       hintText: "New Comment"),
                       onChanged: (String value){
-                        input_comment += value;
+                        input_comment = value;
                       },
                       ),
                       actions:[
