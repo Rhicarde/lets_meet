@@ -1,26 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Takes database reads and converts to usable constructor
 class Calendar_Event {
-  final String id;
   final String title;
   final String description;
   final DateTime date;
-  final String type;
+  late final String type;
 
-  const Calendar_Event({
-    required this.id,
+  Calendar_Event({
     required this.title,
     required this.description,
     required this.date,
     required this.type
   });
 
-
+  // Takes database snapshot plans and creates Calendar Event object using its data
   factory Calendar_Event.fromPlanFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot,
       [SnapshotOptions? options]) {
     final data = snapshot.data()!;
     return Calendar_Event(
-      id: snapshot.id,
       title: data['title'],
       description: data['description'],
       date: data['date'].toDate(),
@@ -28,11 +26,11 @@ class Calendar_Event {
     );
   }
 
+  // Takes database snapshot events and creates Calendar Event object using its data
   factory Calendar_Event.fromEventFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot,
       [SnapshotOptions? options]) {
     final data = snapshot.data()!;
     return Calendar_Event(
-      id: snapshot.id,
       title: data['title'],
       description: data['description'],
       date: data['date'].toDate(),
@@ -40,23 +38,22 @@ class Calendar_Event {
     );
   }
 
+  // Takes compared user's database snapshot plans and creates Calendar Event object using its data
   factory Calendar_Event.fromOtherPlanFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot,
       [SnapshotOptions? options]) {
     final data = snapshot.data()!;
     return Calendar_Event(
-      id: snapshot.id,
       title: data['title'],
       description: data['description'],
       date: data['date'].toDate(),
       type: 'other_plan',
     );
   }
-
+  // Takes compared user's database snapshot events and creates Calendar Event object using its data
   factory Calendar_Event.fromOtherEventFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot,
       [SnapshotOptions? options]) {
     final data = snapshot.data()!;
     return Calendar_Event(
-      id: snapshot.id,
       title: data['title'],
       description: data['description'],
       date: data['date'].toDate(),
@@ -64,6 +61,7 @@ class Calendar_Event {
     );
   }
 
+  // Constructor Getter
   Map<String, Object?> toFirestore() {
     return {
       "title": title,
@@ -71,5 +69,10 @@ class Calendar_Event {
       "time": Timestamp.fromDate(date),
       "type": type,
     };
+  }
+
+  // Setter for object type param
+  setType(String type) {
+    this.type = type;
   }
 }

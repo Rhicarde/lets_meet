@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 import 'Calendar_Event.dart';
 
-
+// Displays details of plans and events on selected day
 class CalendarItem extends StatelessWidget {
   final Calendar_Event schedule;
   const CalendarItem({
@@ -11,6 +11,7 @@ class CalendarItem extends StatelessWidget {
     required this.schedule,
   }) : super(key: key);
 
+  // Builds screen with item details
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -35,6 +36,7 @@ class CalendarItem extends StatelessWidget {
     );
   }
 
+  // Gets calendar color for type of event
   Color getCodeColor(dynamic e){
     switch (e.type) {
       case 'self_plan':

@@ -10,7 +10,9 @@ import 'CalendarItem.dart';
 import 'Calendar_Event.dart';
 import 'Plans/Schedule.dart';
 
+// Screen that displays calendar with both users' plans and events for the month
 class compare_schedule extends StatefulWidget {
+  // Requires params when calling this screen
   final int month;
   final String compareId;
 
@@ -21,10 +23,12 @@ class compare_schedule extends StatefulWidget {
 }
 
 class _compareSchedule extends State<compare_schedule> {
+  // Initializes database
   FirebaseAuth auth = FirebaseAuth.instance;
   late User? user;
   late String userId;
 
+  // Calendar variables
   late DateTime _focusedDay;
   late DateTime _firstDay;
   late DateTime _lastDay;
@@ -32,10 +36,12 @@ class _compareSchedule extends State<compare_schedule> {
   late CalendarFormat _calendarFormat;
   late Map<DateTime, List<Calendar_Event>> _cal_events;
 
+  // Hash equation to for HashList
   int getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
 
+  // Initializes Calendar variables and User Id
   @override
   void initState() {
     super.initState();
@@ -43,7 +49,7 @@ class _compareSchedule extends State<compare_schedule> {
       equals: isSameDay,
       hashCode: getHashCode,
     );
-    
+
     User? user = auth.currentUser;
     if (user != null){
       userId = user.uid;
@@ -60,6 +66,8 @@ class _compareSchedule extends State<compare_schedule> {
     _loadAllCalendarSchedule();
   }
 
+  // Loads all users' plans and events
+  // Adds to calendar list
   _loadAllCalendarSchedule() async {
     final firstDay = DateTime(_focusedDay.year, _focusedDay.month, 1);
     final lastDay = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
@@ -82,6 +90,15 @@ class _compareSchedule extends State<compare_schedule> {
       if (_cal_events[day] == null) {
         _cal_events[day] = [];
       }
+
+      if (_cal_events[day]!.contains(cal_event)) {
+        int index = _cal_events[day]!.indexWhere((element) => element == cal_event);
+
+        cal_event.setType('shared');
+
+        _cal_events[day]![index] = cal_event;
+      }
+
       _cal_events[day]!.add(cal_event);
     }
 
@@ -102,6 +119,15 @@ class _compareSchedule extends State<compare_schedule> {
       if (_cal_events[day] == null) {
         _cal_events[day] = [];
       }
+
+      if (_cal_events[day]!.contains(cal_event)) {
+        int index = _cal_events[day]!.indexWhere((element) => element == cal_event);
+
+        cal_event.setType('shared');
+
+        _cal_events[day]![index] = cal_event;
+      }
+
       _cal_events[day]!.add(cal_event);
     }
 
@@ -122,6 +148,15 @@ class _compareSchedule extends State<compare_schedule> {
       if (_cal_events[day] == null) {
         _cal_events[day] = [];
       }
+
+      if (_cal_events[day]!.contains(cal_event)) {
+        int index = _cal_events[day]!.indexWhere((element) => element == cal_event);
+
+        cal_event.setType('shared');
+
+        _cal_events[day]![index] = cal_event;
+      }
+
       _cal_events[day]!.add(cal_event);
     }
 
@@ -142,16 +177,97 @@ class _compareSchedule extends State<compare_schedule> {
       if (_cal_events[day] == null) {
         _cal_events[day] = [];
       }
+
+      if (_cal_events[day]!.contains(cal_event)) {
+        int index = _cal_events[day]!.indexWhere((element) => element == cal_event);
+
+        cal_event.setType('shared');
+
+        _cal_events[day]![index] = cal_event;
+      }
+
+      _cal_events[day]!.add(cal_event);
+    }
+
+    var invited = await FirebaseFirestore.instance
+        .collection('Users').doc(userId).collection('Schedules').doc('Event').collection('InvitedEvents')
+        .where('eventDate', isGreaterThanOrEqualTo: firstDay)
+        .where('eventDate', isLessThan: lastDay).get();
+
+    for (var doc in invited.docs) {
+      String title = '';
+
+      var docRef = FirebaseFirestore.instance
+          .collection('Users').doc(doc.get('userId')).collection('Schedules').doc('Event').collection('Event').doc(doc.get('eventId'))
+          .withConverter(
+          fromFirestore: Calendar_Event.fromEventFirestore,
+          toFirestore: (Calendar_Event cal_event, options) => cal_event.toFirestore());
+
+      var docSnap = await docRef.get();
+
+      final cal_event = docSnap.data()!;
+
+      final day =
+      DateTime.utc(cal_event.date.year, cal_event.date.month, cal_event.date.day);
+      if (_cal_events[day] == null) {
+        _cal_events[day] = [];
+      }
+
+      if (_cal_events[day]!.contains(cal_event)) {
+        int index = _cal_events[day]!.indexWhere((element) => element == cal_event);
+
+        cal_event.setType('shared');
+
+        _cal_events[day]![index] = cal_event;
+      }
+
+      _cal_events[day]!.add(cal_event);
+    }
+
+    invited = await FirebaseFirestore.instance
+        .collection('Users').doc(widget.compareId).collection('Schedules').doc('Event').collection('InvitedEvents')
+        .where('eventDate', isGreaterThanOrEqualTo: firstDay)
+        .where('eventDate', isLessThan: lastDay).get();
+
+    for (var doc in invited.docs) {
+      String title = '';
+
+      var docRef = FirebaseFirestore.instance
+          .collection('Users').doc(doc.get('userId')).collection('Schedules').doc('Event').collection('Event').doc(doc.get('eventId'))
+          .withConverter(
+          fromFirestore: Calendar_Event.fromOtherEventFirestore,
+          toFirestore: (Calendar_Event cal_event, options) => cal_event.toFirestore());
+
+      var docSnap = await docRef.get();
+
+      final cal_event = docSnap.data()!;
+
+      final day =
+      DateTime.utc(cal_event.date.year, cal_event.date.month, cal_event.date.day);
+      if (_cal_events[day] == null) {
+        _cal_events[day] = [];
+      }
+
+      if (_cal_events[day]!.contains(cal_event)) {
+        int index = _cal_events[day]!.indexWhere((element) => element == cal_event);
+
+        cal_event.setType('shared');
+
+        _cal_events[day]![index] = cal_event;
+      }
+
       _cal_events[day]!.add(cal_event);
     }
 
     setState(() {});
   }
 
+  // Retrieves plans/events for the selected day from the list
   List<Calendar_Event> _getEventsForTheDay(DateTime day) {
     return _cal_events[day] ?? [];
   }
 
+  // Builds screen
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -160,10 +276,11 @@ class _compareSchedule extends State<compare_schedule> {
             title: const Text('Compare Schedule'),
             actions: const <Widget>[]
         ),
+
         body: ListView(
           children: [
             TableCalendar(
-              headerStyle: HeaderStyle(
+              headerStyle: const HeaderStyle(
                 formatButtonVisible : false,
                 leftChevronVisible: false,
                 rightChevronVisible: false,
@@ -239,6 +356,7 @@ class _compareSchedule extends State<compare_schedule> {
             ),
           ],
         ),
+      // Allows user to add a new plan/event
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push<bool>(
@@ -258,6 +376,7 @@ class _compareSchedule extends State<compare_schedule> {
     );
   }
 
+  // Gets calendar color for type of event
   Color getCodeColor(dynamic e){
     switch (e.type) {
       case 'self_plan':
@@ -268,6 +387,8 @@ class _compareSchedule extends State<compare_schedule> {
         return Colors.yellow;
       case 'other_event':
         return Colors.yellow;
+      case 'shared':
+        return Colors.green;
     }
     return Colors.black;
   }
