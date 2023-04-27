@@ -241,6 +241,15 @@ class EventDetail extends State<DisplayEventDetail> {
                               },
                               child: const Text('Invite a Friend'),
                             ),
+                            TextButton(
+                              onPressed: (){
+                                Navigator.push(
+                                    context, MaterialPageRoute(
+                                  builder: (context) => OptimalDeparture(event: widget.event),));
+                              },
+                              child: const Text('Optimal Departure Time'),
+
+                            )
                           ]
                       ),
                     ),
