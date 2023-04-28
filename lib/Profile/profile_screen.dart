@@ -26,6 +26,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   User_Database db = User_Database();
 
+  // Collects user data from Firebase Database and stores it in the variables
+  Future _getDataFromDatabase() async {
+    print(name);
+    await FirebaseFirestore.instance.collection("users")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((snapshot) async {
+      if(snapshot.exists) {
+        setState(() {
+          name = snapshot.data()!["name"];
+          email = snapshot.data()!["email"];
+          phoneNumber = snapshot.data()!["phoneNumber"];
+          // image = snapshot.data()!["userImage"];
+
+        });
+      }
+    });
+  }
+
   // Runs first when the page loads
   @override
   void initState() {
