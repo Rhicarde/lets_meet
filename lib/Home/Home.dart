@@ -20,11 +20,18 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home>{
+  // Initializing database and user
   User_Database db = User_Database();
   FirebaseAuth auth = FirebaseAuth.instance;
 
-  List<Pair> months = [Pair('Jan', 1), Pair('Feb', 2), Pair('Mar', 3), Pair('Apr', 4), Pair('May', 5), Pair('Jun', 6), Pair('Jul', 7), Pair('Aug', 8), Pair('Sep', 9), Pair('Oct', 10), Pair('Nov', 11), Pair('Dec', 12)];
+  // List to pair String month to int
+  List<Pair> months = [
+    Pair('Jan', 1), Pair('Feb', 2), Pair('Mar', 3), Pair('Apr', 4),
+    Pair('May', 5), Pair('Jun', 6), Pair('Jul', 7), Pair('Aug', 8),
+    Pair('Sep', 9), Pair('Oct', 10), Pair('Nov', 11), Pair('Dec', 12)
+  ];
 
+  // Date format - Month Name Day
   DateTime viewedDate = DateUtils.dateOnly(DateTime.now());
   var dateFormat = DateFormat('MMMM dd');
 
@@ -39,22 +46,31 @@ class _Home extends State<Home>{
     viewedDate = viewedDate.subtract(const Duration(days: 1));
   }
 
+  // Init values
+  // index is used to track dropdown user value
   int index = 0;
+  // index_month used to track dropdown month value
   int index_month = 0;
+  // saved userId
   String userId = '';
+  // initial month value
   int month = 1;
+
+  // Building screen
   @override
   Widget build(BuildContext context) {
+    // Retrieve logged in user
     User? user = auth.currentUser;
     
     return Scaffold(
+      // Prevents keyboard from pushing up widgets
       resizeToAvoidBottomInset: false,
-      // Top bar that has Sign Out button
-      appBar: AppBar( //creating the search bar which takes in user input
+      appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
           title: const Text('LetsPlan'),
           actions: <Widget>[
+            // Sign out button
             Padding(
                 padding: const EdgeInsets.only(right: 20.0),
                 child: GestureDetector(
@@ -82,6 +98,7 @@ class _Home extends State<Home>{
                 MaterialPageRoute(builder: (context) => Schedule(selectedDay: DateTime.now(),)));
           }
       ),
+
       // Contains weather, text, schedule, and events in a column
       body: Column(
             children: [
@@ -128,6 +145,7 @@ class _Home extends State<Home>{
                                         userId = list.first.a;
                                       }
 
+                                      // Compare schedule selection dialog
                                       return StatefulBuilder(
                                       builder: (BuildContext context, StateSetter dropdownState) {
                                         return AlertDialog(
@@ -222,6 +240,8 @@ class _Home extends State<Home>{
                     ),
                   ]
               ),
+
+              // Displays schedule and events
               Expanded(child: DisplaySchedule(viewedDate),),
               const SizedBox(height: 20),
               const Center(
@@ -285,6 +305,7 @@ class _Home extends State<Home>{
   }
 }
 
+// Pair class used to contain 2 objects
 class Pair<T1, T2> {
   final T1 a;
   final T2 b;

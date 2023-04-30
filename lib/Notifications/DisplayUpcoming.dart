@@ -46,30 +46,83 @@ class ReadUpcoming extends State<DisplayUpcoming> {
           ]
       ),
       body: StreamBuilder(
-        stream: db.get_upcoming_Events(date: DateTime.now()), //getting events from the database
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) {
+        stream: db.get_upcoming_Events(date: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)), //getting events from the database
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> eventSnap) {
+          if (!eventSnap.hasData) {
+            print('no event');
             return ListView();
           }
-          return ListView( //returning the information that is needed to display the notification history
-            children: snapshot.data!.docs.map((event) {
-              return GestureDetector(
-                key: Key(event.get('title')), //getting the event name and information from events
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotificationHistory(event: event))),
-                child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-                    color:Colors.blue,
-                    child:ListTile(
-                      title: Text(event.get('title'),
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 25)),
-                    )
-                ),
-              );
-            }).toList(),
-          );
+          return StreamBuilder(
+              stream: db.get_upcoming_Plans(date: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)),
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> planSnap) {
+                if (!planSnap.hasData) {
+                  print('no plan');
+                  return ListView(
+                    children: eventSnap.data!.docs.map((event) {
+                      return GestureDetector(
+                        key: Key(event.get('title')), //getting the event name and information from events
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotificationHistory(event: event))),
+                        child: Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+                            color:Colors.blue,
+                            child:ListTile(
+                              title: Text(event.get('title'),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25)),
+                            )
+                        ),
+                      );
+                    }).toList(),
+                  );
+                }
+
+                List<Widget> eventWidgets = eventSnap.data!.docs.map((event) {
+                  return GestureDetector(
+                    key: Key(event.get('title')), //getting the event name and information from events
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotificationHistory(event: event))),
+                    child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+                        color:Colors.blue,
+                        child:ListTile(
+                          title: Text(event.get('title'),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25)),
+                        )
+                    ),
+                  );
+                }).toList();
+
+
+                List<Widget> planWidget = planSnap.data!.docs.map((plan) {
+                  return GestureDetector(
+                    key: Key(plan.get('title')), //getting the event name and information from events
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayPlanNotificationHistory(plan: plan))),
+                    child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+                        color:Colors.blue,
+                        child:ListTile(
+                          title: Text(plan.get('title'),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25)),
+                        )
+                    ),
+                  );
+                }).toList();
+
+                for (var i in planWidget) {
+                  eventWidgets.add(i);
+                }
+
+                return ListView( //returning the information that is needed to display the notification history
+                    children: eventWidgets
+                );
+              });
         },
       ),
     );

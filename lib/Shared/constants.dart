@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Custom Text Input Decoration used to display colors
 const textInputDecoration = InputDecoration(
   fillColor: Colors.blue,
   enabledBorder: OutlineInputBorder(
@@ -10,6 +11,7 @@ const textInputDecoration = InputDecoration(
   ),
 );
 
+// Custom Container Box Decoration
 var containerDecor = Container(
   height: 50.0,
   width: 150.0,
@@ -18,6 +20,8 @@ var containerDecor = Container(
   ),
 );
 
+
+// Custom Font Size for Text
 const textStyleHeader = TextStyle(
   fontSize: 40.0
 );

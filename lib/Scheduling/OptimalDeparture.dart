@@ -21,6 +21,7 @@ class OptimalDeparture extends StatefulWidget {
 }
 
 class _OptimalDeparture extends State<OptimalDeparture> {
+  // Initialize
   String? _currentAddress;
   Position? _currentPosition;
   int? duration;
@@ -38,6 +39,7 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     bool serviceEnabled;
     LocationPermission permission;
 
+    // wait for location services to be allowed
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -68,6 +70,7 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     final hasPermission = await _handleLocationPermission();
 
     if (!hasPermission) return;
+    // use Geolocator to get current position
     await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
         .then((Position position) {
       setState(() => _currentPosition = position);
@@ -124,6 +127,7 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     final formatter = DateFormat('HH:mm');
     return formatter.format(dateTime);
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -16,12 +16,8 @@ class Search extends StatefulWidget {
 class _Search extends State<Search> {
   User_Database db = User_Database();
 
-  //final _titleTextController = TextEditingController();
-
   //initialize search value
   String searchValue = '';
-
-  //Future<QuerySnapshot>? myListSuggest;
 
   //creating the getter for the query
   get query => null;
@@ -45,24 +41,6 @@ class _Search extends State<Search> {
                   Flexible(child: DisplaySearch(query:searchValue)),
               ]
             ),
-            /*
-            drawer: Drawer(
-                child: ListView(
-                      ListTile(
-                          title: const Text('Item 1'),
-                          onTap: () => Navigator.pop(context)
-                      ),
-                      ListTile(
-                          title: const Text('Item 2'),
-                          onTap: () => Navigator.pop(context)
-                      )
-                    ]
-                )
-            ),
-             */
-            //body: Center(
-                //child: Text('Value: $searchValue')
-            //)
         );
   }
 }

@@ -34,6 +34,7 @@ class EventEdit extends State<DisplayEventEdit> {
     bool remind = false;
     bool repeat = false;
 
+    // getting values through documentreference
     widget.event.get().then((value) {
       _titleTextController.text = value.get('title');
       _bodyTextController.text = value.get('description');

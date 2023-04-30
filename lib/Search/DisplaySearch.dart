@@ -109,6 +109,7 @@ class ReadSearch extends State<DisplaySearch> {
               }
 
               // Both Events and Plans searched, display both
+              // Creating widgets for events
               List<GestureDetector> eventList = Eventsnapshot.data!.docs.map((search) {
                 return GestureDetector(
                   key: Key(search.get('title')),
@@ -132,6 +133,7 @@ class ReadSearch extends State<DisplaySearch> {
                 );
               }).toList();
 
+              // Creating widgets for plans
               List<GestureDetector> searchList = snapshot.data!.docs.map((search) {
                 return GestureDetector(
                   key: Key(search.get('title')),
