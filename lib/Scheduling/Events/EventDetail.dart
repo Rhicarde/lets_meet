@@ -7,7 +7,7 @@ import '../../Database/Schedule Database.dart';
 import '../../Shared/constants.dart';
 import 'EventInvitation.dart';
 import 'package:lets_meet/Scheduling/Events/EventEditScreen.dart';
-import 'package:lets_meet/Scheduling/OptimalDeparture.dart';
+import 'package:lets_meet/Scheduling/Events/OptimalDeparture.dart';
 
 
 class DisplayEventDetail extends StatefulWidget {

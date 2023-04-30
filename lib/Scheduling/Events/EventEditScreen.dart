@@ -26,6 +26,7 @@ class EventEdit extends State<DisplayEventEdit> {
 
   @override
   Widget build(BuildContext context) {
+
     User_Database db = User_Database();
 
     // Get Timestamp from Firebase and Convert to DateTime
@@ -41,7 +42,7 @@ class EventEdit extends State<DisplayEventEdit> {
       _locationTextController.text = value.get('location');
       timeInput.text = value.get('time');
       _commentTextController.text = value.get('comments').join('\n');
-      dateTime = value.get('date').toDate();
+      Timestamp date = value.get('date');
       remind = value.get('remind');
       repeat = value.get('repeat');
     });
@@ -87,27 +88,31 @@ class EventEdit extends State<DisplayEventEdit> {
             style: TextStyle(fontSize: 18),
               readOnly: true,
             ),
+            //Editing Time
             TextFormField(
-            controller: timeInput,
-            decoration: InputDecoration(
-            icon: Icon(Icons.access_time_outlined),
-            labelText: "Pick Time"
-            ),
-            readOnly: false,
-            style: TextStyle(fontSize: 18),
-            onTap: () async {
-            TimeOfDay? newTime = await showTimePicker(
-            context: context,
-            initialTime: time
-            );
+              controller: timeInput,
+              decoration: InputDecoration(
+              icon: Icon(Icons.access_time_outlined),
+              labelText: "Pick Time"
+              ),
+              readOnly: false,
+              style: TextStyle(fontSize: 18),
+              onTap: () async {
+                TimeOfDay? newTime = await showTimePicker(
+                    context: context,
+                    initialTime: time
+                );
 
-            if (newTime == null) return;
-
-            setState(() {
-            time = newTime;
-            timeInput.text = newTime.format(context);
-            });
-            }
+                // if (newTime == null) return;
+                if (newTime != null) {
+                  setState(() {
+                    time = newTime;
+                    timeInput.text = newTime.format(context);
+                  });
+                  FirebaseFirestore.instance.collection('Users').doc(user?.uid).collection('Schedules').doc('Event').collection('Event').doc(widget.event.id).update(
+                      {'time': timeInput.text});
+                }
+              }
             ),
             TextFormField(
             controller: dateInput,
@@ -154,7 +159,7 @@ class EventEdit extends State<DisplayEventEdit> {
                   'title': title,
                   'description': description,
                   'location': location,
-                  'time': time,
+                  //'time': time,
                   'comments': comments,
                 });
 
