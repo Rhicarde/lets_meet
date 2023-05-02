@@ -56,7 +56,7 @@ class _CreateSchedule extends State<Schedule> {
         appBar: AppBar(
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             centerTitle: Theme.of(context).appBarTheme.centerTitle,
-            title: const Text('Lets Plan'),
+            title: const Text('Create Schedule'),
             actions: const <Widget>[]
         ),
         body: ListView(

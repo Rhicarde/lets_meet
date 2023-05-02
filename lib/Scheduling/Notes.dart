@@ -32,43 +32,46 @@ class _CreateNote extends State<Notes>{
           title: const Text('Notes'),
           // Create Note Button
           actions: <Widget>[
-            FloatingActionButton(
-                child: const Icon(
-                  Icons.add,
-                ),
-                onPressed: (){
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context){
-                          return AlertDialog(
-                            title: Text("Create Note"),
-                            content: TextField(
-                              decoration: InputDecoration(
-                              hintText: "New Note"),
-                              onChanged: (String value){
-                                input = value;
-                              },
-                            ),
-                              actions:[ // Create button adding the new notes to the list of notes
-                                ElevatedButton(
-                                    onPressed: () async {
-                                      Map<String, dynamic> dataToSave = {
-                                        'Note': input
-                                      };
-                                      await FirebaseFirestore.instance.collection("Users").doc(user?.uid).collection('Schedules').doc("Notes").collection("Notes").add(dataToSave).then((DocumentReference doc){
-                                        nid = doc.id; // document id of newly created note
-                                      });
-                                      setState(() {
-                                        Notes.add(input);
-                                      });
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text("Create"))
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                  child: const Icon(
+                    Icons.add,
+                  ),
+                  onTap: (){
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                              title: Text("Create Note"),
+                              content: TextField(
+                                decoration: InputDecoration(
+                                hintText: "New Note"),
+                                onChanged: (String value){
+                                  input = value;
+                                },
+                              ),
+                                actions:[ // Create button adding the new notes to the list of notes
+                                  ElevatedButton(
+                                      onPressed: () async {
+                                        Map<String, dynamic> dataToSave = {
+                                          'Note': input
+                                        };
+                                        await FirebaseFirestore.instance.collection("Users").doc(user?.uid).collection('Schedules').doc("Notes").collection("Notes").add(dataToSave).then((DocumentReference doc){
+                                          nid = doc.id; // document id of newly created note
+                                        });
+                                        setState(() {
+                                          Notes.add(input);
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("Create"))
     ],
 
-                          );
-                        });
-                },
+                            );
+                          });
+                  },
+              ),
             ),
     ],
     ),

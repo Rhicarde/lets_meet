@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lets_meet/Scheduling/Notes.dart';
 import 'package:lets_meet/Scheduling/Weather/Weather.dart';
 import '../../Database/Schedule Database.dart';
 import '../../Login/Auth.dart';
@@ -69,7 +70,21 @@ class _Home extends State<Home>{
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
           title: const Text('LetsPlan'),
-
+          actions: [
+            Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: GestureDetector(
+                  child: const Icon(
+                    Icons.note_add_outlined,
+                    size: 26.0,
+                  ),
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Notes()),
+                    );
+                  },
+                ),
+            )
+          ],
       ),
 
       // A side bar menu that allows user to view all incoming requests
