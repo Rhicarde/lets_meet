@@ -1,10 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:lets_meet/Scheduling/Weather/data_service.dart';
-import 'package:flutter/material.dart';
-import 'package:lets_meet/Scheduling/Weather/get_location.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import 'models.dart';
@@ -153,21 +152,23 @@ class _WeatherPage extends State<WeatherPage> {
   // and related weather/temperature information
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
+    return Scaffold(
           body: Center(
-              child: SingleChildScrollView(
-                // Displays the user's city and the temperature data of that city
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(cityName),
-                    Text(temp.toInt().toString() + '°F'),
-                  ],
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(cityName,
+                  style: GoogleFonts.lato(
+                    fontSize: 28
+                  ),),
+                  Text(temp.toInt().toString() + '°F',
+                  style: GoogleFonts.lato(
+                    fontSize: 22
+                  ),),
+                ],
               )
           ),
-        ));
+        );
   }
 
 // Creates the search function which requests information related to a specific city

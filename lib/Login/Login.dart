@@ -192,7 +192,7 @@ class _Login extends State<Login>{
                                             });
 
                                             if (user != null) {
-                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProfileVerification(),),);
+                                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => ProfileVerification(),),);
                                             }
                                           }
                                         },

@@ -69,23 +69,7 @@ class _Home extends State<Home>{
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
           title: const Text('LetsPlan'),
-          actions: <Widget>[
-            // Sign out button
-            Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: GestureDetector(
-                  child: const Icon(
-                    Icons.exit_to_app,
-                    size: 26.0,
-                  ),
-                  onTap: () => FirebaseAuth.instance.signOut().then((res) {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()),
-                    );
-                  },
-                  ),
-                )
-            )
-          ],
+
       ),
 
       // A side bar menu that allows user to view all incoming requests
@@ -103,15 +87,13 @@ class _Home extends State<Home>{
       body: Column(
             children: [
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
               Container(
                 height: 80,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.green,
-                  border: Border.all(color: Colors.green),
-                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.blue),
                 ),
                 child: const WeatherPage(),
               ),

@@ -28,22 +28,6 @@ class ReadUpcoming extends State<DisplayUpcoming> {
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
           title: const Text('Upcoming'),
-          actions: <Widget>[
-            Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: GestureDetector(
-                  child: const Icon(
-                    Icons.exit_to_app,
-                    size: 26.0,
-                  ),
-                  onTap: () => FirebaseAuth.instance.signOut().then((res) {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()),
-                    );
-                  },
-                  ),
-                )
-            )
-          ]
       ),
       body: StreamBuilder(
         stream: db.get_upcoming_Events(date: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)), //getting events from the database

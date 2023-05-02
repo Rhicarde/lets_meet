@@ -67,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               return ListView();
             }
             // Get the first document in the user's information collection (there's only one document)
-            var userInfoDoc = snapshot.data!.docs.first!;
+            var userInfoDoc = snapshot.data!.docs.first;
 
             // Returns a view with user info if there is data to be displayed
                 return Stack(
