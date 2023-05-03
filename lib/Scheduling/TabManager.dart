@@ -5,6 +5,11 @@ import 'package:lets_meet/Notifications/DisplayUpcoming.dart';
 import 'package:lets_meet/Profile/profile_screen.dart';
 import '../Home/Home.dart';
 import '../Search/Search.dart';
+import 'package:lets_meet/Settings/settings.dart';
+
+import '../Database/Schedule Database.dart';
+import '../Notifications/Notification_History.dart';
+import '../Notifications/Notification_Services.dart';
 
 // Tab Manager manages the indexing and swapping between screens on the navigation bar
 class Pages extends StatefulWidget {
@@ -23,7 +28,7 @@ class _Pages extends State<Pages>{
     DisplayUpcoming(),
     Home(),
     Search(),
-    ProfileScreen(),
+    SettingsPage(),
   ];
 
   @override

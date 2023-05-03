@@ -179,6 +179,7 @@ class _Register extends State<Register> {
                                           formKey: _registerFormKey,
                                         );
                                         db.createProfile(name: _nameTextController.text, email: _emailTextController.text);
+                                        setState(() {});
                                       }
                                     },
                                     child: Row(
