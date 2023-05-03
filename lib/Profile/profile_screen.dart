@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_meet/Database/Schedule Database.dart';
 
 // Creates the profile screen page
 class ProfileScreen extends StatefulWidget {
@@ -15,13 +16,15 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
 
   // Store user information as variables
-  String name = 'Kieran King';
-  String? email = 'kieran.king@student.csulb.edu';
-  String? phoneNumber = '2094143627';
+  String name = 'Unnamed';
+  String? email = 'No email';
+  String? phoneNumber = '0000000000';
 
   // Image data for profile picture
   // String? image = '';
   // File? imagxFile;
+
+  User_Database db = User_Database();
 
   // Collects user data from Firebase Database and stores it in the variables
   Future _getDataFromDatabase() async {
@@ -30,17 +33,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .get()
         .then((snapshot) async {
-          if(snapshot.exists) {
-            setState(() {
-              name = snapshot.data()!["name"];
-              email = snapshot.data()!["email"];
-              phoneNumber = snapshot.data()!["phoneNumber"];
-              // image = snapshot.data()!["userImage"];
+      if(snapshot.exists) {
+        setState(() {
+          name = snapshot.data()!["name"];
+          email = snapshot.data()!["email"];
+          phoneNumber = snapshot.data()!["phoneNumber"];
+          // image = snapshot.data()!["userImage"];
 
-            });
-          }
+        });
+      }
     });
-
   }
 
   // Runs first when the page loads
@@ -54,107 +56,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-          )
-        ),
-        centerTitle: true,
-        //backgroundColor: Colors.pink.shade400,
-        title: const Center(
-          child: Text('Profile Screen'),
-        ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          // gradient: LinearGradient(
-          //   colors: [Colors.pink, Colors.deepOrange.shade300],
-          //   begin: Alignment.centerLeft,
-          //   end: Alignment.centerRight,
-          //   stops: const [0.2, 0.9],
-          // )
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: () {
-                // _showImageDialog
-              },
-              child: CircleAvatar(
-                backgroundColor: Colors.black,
-                minRadius: 60.0,
-                  child: CircleAvatar(
-                    radius: 50.0,
-                    // backgroundImage: imagxFile == null
-                    //   ?
-                    //     NetworkImage(
-                    //       image!
-                    //     )
-                    //     :
-                    //     Image.file
-                    //       (imagxFile!).image,
-                  ),
-              )
-            ),
-            // Creates a gap between the user information elements
-            const SizedBox(height: 10.0),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Creates the name element
-                Text(
-                  'Name : Jim Bob',
-                  style: const TextStyle(
-                    fontSize: 25.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // _displayTextInputDialog
-                  },
-                  icon: const Icon(Icons.edit),
-                )
-              ]
-            ),
-            // Creates a gap between the user information elements
-            const SizedBox(height: 10.0),
-            Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Creates the email element
-                  Text(
-                    'Email : jim.bob@student.csulb.edu',
-                    style: const TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.black,
+      appBar: AppBar(title: Text('Profile Page')),
+      // Gathers user info into a data stream
+      body: StreamBuilder(
+          stream: db.getUserInfo(),
+          builder: (BuildContext context,
+              AsyncSnapshot<QuerySnapshot> snapshot) {
+            // Return an empty view if no data
+            if (!snapshot.hasData) {
+              return ListView();
+            }
+            // Get the first document in the user's information collection (there's only one document)
+            var userInfoDoc = snapshot.data!.docs.first;
+
+            // Returns a view with user info if there is data to be displayed
+                return Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Container(
+                          height: 200.0,
+                          color: Colors.blue,
+                          child: const Center(
+                            child: Text('Background Image goes here'),
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            color: Colors.white,
+                            child: Center(
+                              child:Text(
+                                userInfoDoc['name'],
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            color: Colors.white,
+                            child: Center(
+                              child:Text(
+                                userInfoDoc['email'],
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]
                     ),
-                  ),
-                ]
-            ),
-            // Creates a gap between the user information elements
-            const SizedBox(height: 10.0),
-            Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Creates the phone number element
-                  Text(
-                    'Phone Number : 2094143597',
-                    style: const TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.black,
+                    Positioned(
+                      top: 150.0,
+                      child: Container(
+                        height: 100.0,
+                        width: 100.0,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
-                  ),
-                ]
-            ),
-          ]
-        ),
+                  ]
+                );
+          }
       ),
     );
   }

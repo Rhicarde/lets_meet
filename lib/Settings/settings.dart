@@ -1,6 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_meet/Profile/profile_screen.dart';
+
+import '../Login/Auth.dart';
 
 class SettingsPage extends StatefulWidget {
+  const SettingsPage({Key? key}) : super(key: key);
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -15,24 +21,35 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text("Settings"),
       ),
       body: Column(
-        children: const [
-          // Creates the label and icon for the account page
+        children: [
+
           ListTile(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+            },
+            // Creates the label and icon for the profile page
             title: Text(
-                "Account",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
-            trailing: Icon(Icons.account_box, size: 40,),
+              "Profile",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
+            trailing: Icon(Icons.person, size: 40,),
           ),
+
           // Creates a gap for padding between blocks
           SizedBox(
             height: 60,
           ),
-          // Creates the label and icon for the privacy page
+
           ListTile(
+            onTap: () {
+              FirebaseAuth.instance.signOut().then((res) {
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()));
+              });
+            },
+            // Creates the label and icon for the profile page
             title: Text(
-              "Privacy",
+              "Log Out",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
-            trailing: Icon(Icons.lock, size: 40,),
+            trailing: Icon(Icons.exit_to_app, size: 40,),
           ),
           // Creates a gap for padding between blocks
           SizedBox(

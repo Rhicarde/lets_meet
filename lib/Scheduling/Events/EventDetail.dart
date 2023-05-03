@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../Database/Schedule Database.dart';
@@ -23,7 +21,6 @@ class EventDetail extends State<DisplayEventDetail> {
   final _titleTextController = TextEditingController();
   final _bodyTextController = TextEditingController();
   final _locationTextController = TextEditingController();
-  final _commentTextController = TextEditingController();
 
   // Get Timestamp from Firebase and Convert to DateTime
   DateTime dateTime = DateTime.now();
@@ -49,15 +46,8 @@ class EventDetail extends State<DisplayEventDetail> {
   Widget build(BuildContext context) {
     User_Database db = User_Database();
 
-    final hours = (dateTime.hour % 12).toString().padLeft(2, '0');
-    final minutes = dateTime.minute.toString().padLeft(2, '0');
-
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
     dateInput.text = formattedDate;
-    TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
-
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user = auth.currentUser;
 
     return FutureBuilder<Tuple>(
         future: _loadEventData(),
@@ -78,7 +68,7 @@ class EventDetail extends State<DisplayEventDetail> {
                   backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                   centerTitle: Theme.of(context).appBarTheme.centerTitle,
                   title: Text(_titleTextController.text,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   leading: Builder(
                     builder: (BuildContext context) {
                       final ScaffoldState? scaffold = Scaffold.maybeOf(context);
@@ -87,9 +77,9 @@ class EventDetail extends State<DisplayEventDetail> {
                       final bool canPop = parentRoute?.canPop ?? false;
 
                       if (hasEndDrawer && canPop) {
-                        return BackButton();
+                        return const BackButton();
                       } else {
-                        return SizedBox.shrink();
+                        return const SizedBox.shrink();
                       }
                     },
                   ),
@@ -128,11 +118,11 @@ class EventDetail extends State<DisplayEventDetail> {
                             readOnly: true,
                             controller: _titleTextController,
                             decoration: textInputDecoration.copyWith(hintText: 'Title'),
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: const Icon(Icons.edit),
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEventEdit(event: widget.event)));
                           },
@@ -148,14 +138,14 @@ class EventDetail extends State<DisplayEventDetail> {
                       readOnly: true,
                       controller: _bodyTextController,
                       decoration: textInputDecoration.copyWith(hintText: 'Description'),
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                       maxLines: null,
                     ),
                     TextFormField(
                       readOnly: true,
                       controller: _locationTextController,
                       decoration: textInputDecoration.copyWith(hintText: 'Location'),
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
                     TextFormField(
                       readOnly: true,
@@ -168,17 +158,17 @@ class EventDetail extends State<DisplayEventDetail> {
                     TextFormField(
                       readOnly: true,
                       controller: timeInput,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           icon: Icon(Icons.access_time_outlined),
                           labelText: "Pick Time"
                       ),
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 20,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Repeat? ", style: TextStyle(fontSize: 18)),
+                        const Text("Repeat? ", style: TextStyle(fontSize: 18)),
                         Checkbox(
                             value: repeat,
                             onChanged: (bool? value) {
@@ -186,7 +176,7 @@ class EventDetail extends State<DisplayEventDetail> {
                                 repeat = value!;
                               });
                             }),
-                        Text("Remind? ", style: TextStyle(fontSize: 18)),
+                        const Text("Remind? ", style: TextStyle(fontSize: 18)),
                         Checkbox(
                             value: remind,
                             onChanged: (bool? value) {
@@ -206,7 +196,7 @@ class EventDetail extends State<DisplayEventDetail> {
                                   Expanded(
                                     child: Column(
                                       children: [
-                                        Text(
+                                        const Text(
                                           "Comments:",
                                           style: TextStyle(
                                             fontSize: 20, // adjust font size as needed
@@ -216,7 +206,7 @@ class EventDetail extends State<DisplayEventDetail> {
                                         for (var comment in comments)
                                           Text(
                                             comment,
-                                            style: TextStyle(fontSize: 16),
+                                            style: const TextStyle(fontSize: 16),
                                           ),
                                       ],
                                     ),
@@ -259,7 +249,7 @@ class EventDetail extends State<DisplayEventDetail> {
             );
           }
           else {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
         }
     );

@@ -80,7 +80,7 @@ class _CreateEvent extends State<Event>{
         appBar: AppBar(
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             centerTitle: Theme.of(context).appBarTheme.centerTitle,
-            title: const Text('Create Event'),
+            title: const Text('Create Schedule'),
             actions: const <Widget>[]
         ),
         body: ListView (

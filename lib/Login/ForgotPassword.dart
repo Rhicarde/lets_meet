@@ -83,7 +83,7 @@ class _ForgotPassword extends State<ForgotPassword> {
                                     context: context);
                               }
                               // Returns to login screen
-                              Navigator.of(context).pop(); //pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()));
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()));
                             },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
