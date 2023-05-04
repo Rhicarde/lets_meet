@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_meet/Notifications/DisplayNotifications.dart';
 
 import '../Database/Schedule Database.dart';
 import '../Login/Auth.dart';
@@ -28,6 +29,20 @@ class ReadUpcoming extends State<DisplayUpcoming> {
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: Theme.of(context).appBarTheme.centerTitle,
           title: const Text('Upcoming'),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: GestureDetector(
+                child: const Icon(
+                  Icons.notification_add,
+                  size: 26.0,
+                ),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotification(title: '')));
+                }
+              )
+            )
+          ],
       ),
       body: StreamBuilder(
         stream: db.get_upcoming_Events(date: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)), //getting events from the database

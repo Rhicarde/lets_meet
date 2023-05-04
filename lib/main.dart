@@ -4,10 +4,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:lets_meet/Login/ProfileVerification.dart';
 import 'Login/Auth.dart';
 import 'Login/Authentication/fire_auth.dart';
+import 'Notifications/Notification_Services.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'Notifications/DisplayNotifications.dart';
 
 // App Initializer
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService().initNotification();
+  tz.initializeTimeZones();
   await Firebase.initializeApp();
   runApp(MyApp());
 }

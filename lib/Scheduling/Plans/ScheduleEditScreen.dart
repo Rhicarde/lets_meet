@@ -16,23 +16,18 @@ class DisplayScheduleEdit extends StatefulWidget {
 }
 
 class ScheduleEdit extends State<DisplayScheduleEdit> {
-  // David Parkin
-  // Initializers
   final _titleTextController = TextEditingController();
   final _bodyTextController = TextEditingController();
 
   TextEditingController dateInput = TextEditingController(); // text editing controller for date text field
   TextEditingController timeInput = TextEditingController(); // text editing controller for time text field
 
-  // Get Timestamp from Firebase and Convert to DateTime
-  DateTime dateTime = DateTime.now();
-
-  // Colin Tran
   @override
   Widget build(BuildContext context) {
     User_Database db = User_Database();
 
-
+    // Get Timestamp from Firebase and Convert to DateTime
+    DateTime dateTime = DateTime.now();
 
     bool remind = false;
     bool repeat = false;
@@ -127,7 +122,6 @@ class ScheduleEdit extends State<DisplayScheduleEdit> {
                       });
                     }
                 ),
-                // David Parkin
                 ElevatedButton(
                   onPressed: () {
 

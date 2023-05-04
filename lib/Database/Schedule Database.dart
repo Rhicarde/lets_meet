@@ -21,6 +21,9 @@ class User_Database {
 
     if (user != null){
       users.doc(user.uid)
+          // .collection('Schedules')
+          // .doc('Plan').collection('Plans')
+          // .add({'body': body, 'remind': remind, 'repeat': repeat, 'title': title, 'time': time, 'titleSearch': titleSearchParam(title: title), 'completed': false});
           .collection('Schedules')
           .doc('Plan').collection('Plans')
           .add({'description': description, 'remind': remind, 'repeat': repeat, 'title': title, 'date': date, 'titleSearch': titleSearchParam(title: title), 'completed': false});
@@ -357,6 +360,12 @@ class User_Database {
          .collection('Schedules')
          .doc('Event').collection('InvitedEvents').add({'userId': request.get('userId'), 'eventId': request.get('eventId'), 'eventDate': request.get('eventDate')});
 
+     /*
+     users.doc(request.get('userId'))
+          .collection('Schedules')
+          .doc('Requests').collection('Accepted Event').add({'userId': user.uid});
+     */
+
       update_event_invitation(userId: request.get('userId'), eventId: request.get('eventId'));
       remove_request(id: request.id);
     }
@@ -523,3 +532,46 @@ class User_Database {
     }
   }
 }
+
+
+//read date
+// class DisplayDate extends StatefulWidget {
+//   const DisplayDate({Key? key}) : super(key: key);
+//
+//   @override
+//   ReadDate createState() => ReadDate();
+// }
+//
+// class ReadDate extends State<DisplayDate> {
+//   @override
+//   Widget build(BuildContext context) {
+//     User_Database db = User_Database();
+//
+//     return Scaffold(
+//       body: StreamBuilder(
+//         stream: db.getDate(),
+//         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//           if (!snapshot.hasData) {
+//             return ListView();
+//           }
+//           return ListView(
+//             children: snapshot.data!.docs.map((schedules) {
+//               return Container(
+//                   decoration: const BoxDecoration(
+//                     color: Colors.blue,
+//                   ),
+//                   padding: const EdgeInsets.fromLTRB(20,30,20,30),
+//                   alignment: Alignment.center,
+//                   child:
+//                   ExpansionTile (
+//                     title: Text(schedules.get('title')),
+//                     children: [Text(schedules.get('date'))],
+//                   )
+//               );
+//             }).toList(),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
