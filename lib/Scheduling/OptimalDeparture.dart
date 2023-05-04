@@ -152,11 +152,42 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     calculateODT(_eventLocation, _eventDateTime);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Optimal Departure Time")),
+      backgroundColor: Colors.grey.shade200,
+      appBar: AppBar(
+        title: const Text("Optimal Departure Time"),
+        elevation: 0,
+        backgroundColor: Colors.blue,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      // center card to display ODT
       body: Center(
-          child: Text(
-              'To Arrive on Time Depart at: \n ${formattedoDT ?? ""}', style: TextStyle(fontSize: 25)),
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16),
+                const Text(
+                  'To Arrive on Time Depart at:',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  formattedoDT ?? "",
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+
   }
 }
