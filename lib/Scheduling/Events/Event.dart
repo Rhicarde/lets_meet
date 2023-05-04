@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:search_map_location/utils/google_search/place.dart';
@@ -8,6 +10,7 @@ import 'package:search_map_location/utils/google_search/place_type.dart';
 import 'package:search_map_location/search_map_location.dart';
 
 import '../../Database/Schedule Database.dart';
+import '../../Notifications/Notification_Services.dart';
 import '../../Shared/constants.dart';
 import '../Plans/Schedule.dart';
 
@@ -68,7 +71,7 @@ class _CreateEvent extends State<Event>{
     User_Database db = User_Database();
 
     // declaring date variables for date dropdown
-    String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+    String formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
     dateInput.text = formattedDate;
 
     String formattedTime = current_time.format(context);
@@ -145,58 +148,25 @@ class _CreateEvent extends State<Event>{
                 ),
                 readOnly: true,
                 onTap: () async {
-                  await showDatePicker(context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    // range of dates that calendar shows
-                    lastDate: DateTime(DateTime.now().year + 5),).then((pickedDate) {
-                    //then usually do the future job
-                    if (pickedDate == null) {
-                      //if user tap cancel then this function will stop
-                      return;
-                    }
-                    setState(() {
-                      //for rebuilding the ui
-                      // display new selected date
-                      formattedDate = DateFormat('MM/dd/yyyy').format(pickedDate);
-                      dateInput.text = formattedDate;
-                      // updated dateTime
-                      dateTime = DateTime(
-                          pickedDate.year, pickedDate.month, pickedDate.day,
-                          dateTime.hour, dateTime.minute);
-                    });
-                  });
+                  await DatePicker.showDateTimePicker(
+                    context,
+                    showTitleActions: true,
+                    onChanged: (date) {
+                      dateTime = date;
+                      setState(() {
+                        //for rebuilding the ui
+                        // display new selected date
+                        formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
+                        dateInput.text = formattedDate;
+
+                        db_time = Time(dateTime.hour, dateTime.minute).toString();
+                      });
+                    },
+                    onConfirm: (date) {},
+                  );
                 }),
             const SizedBox(height: 20,),
 
-
-            // Time Display
-            // Time Selector Button
-            TextFormField(
-              controller: timeInput,
-              decoration: const InputDecoration(
-                  icon: Icon(Icons.timer),
-                  labelText: "Enter Time"
-              ),
-              readOnly: true,
-              onTap: () async {
-                final time = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay(hour: current_time.hour, minute: current_time.minute));
-                if (time == null) return;
-                setState(() {
-                  //for rebuilding the ui
-                  // display new selected time
-                  timeInput.text = time.format(context);
-                  current_time = time;
-                  // updated time
-                  dateTime = DateTime(
-                      dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
-
-                  db_time = time.format(context);
-                });
-              },
-            ),
             // TextFormField for Location Selection
             SearchLocation(
               apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y', // Google Places API key
@@ -272,6 +242,15 @@ class _CreateEvent extends State<Event>{
 
               child: ElevatedButton(
                   onPressed: ()  async {
+                    // Created Event Notification if remind is true
+                    if (check2) {
+                      debugPrint('Notification Scheduled for $dateTime');
+                      NotificationService().scheduleNotification(
+                          title: "LetsPlan",
+                          body: "Event: $db_title is starting",
+                          scheduledNotificationDateTime: dateTime);
+                    }
+
                     // Converting Place Id to Address to Store in Database
                     final geocoding = GoogleMapsGeocoding(
                       apiKey: 'AIzaSyC7cVVVOgBwl3lQEJLZe-b8wCs0uVPq66Y'
@@ -281,9 +260,7 @@ class _CreateEvent extends State<Event>{
                     db_location = result as String;
                     //saving event data to database
                     db.add_event(title: db_title, description: db_body, location: db_location, remind: check2, repeat: check1, comments: [input_comment], date: dateTime, time: db_time, userIds: []);
-                    // eList.add(Event(dateTime, "New"));
-                    // db.add_note(body: body, title: title);
-                    //Navigator.pop(Schedule());
+
                     Navigator.of(context).pop();
                   },
                   // Create Event Button

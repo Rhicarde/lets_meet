@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:lets_meet/Notifications/Notification_Services.dart';
 import '../../Database/Schedule Database.dart';
 import '../../Login/Authentication/validator.dart';
 import 'package:lets_meet/Scheduling/Events/Event.dart';
@@ -46,7 +48,7 @@ class _CreateSchedule extends State<Schedule> {
     User_Database db = User_Database();
 
     // Date format
-    String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+    String formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
     dateInput.text = formattedDate;
     // Time format
     String formattedTime = current_time.format(context);
@@ -112,7 +114,7 @@ class _CreateSchedule extends State<Schedule> {
                   ),
               decoration: textInputDecoration.copyWith(hintText: 'Description'),
             ),
-            // Text box for date - will show calendar
+            // Text box for date and time - will show calendar
             TextFormField(
                 controller: dateInput,
                 decoration: const InputDecoration(
@@ -121,54 +123,21 @@ class _CreateSchedule extends State<Schedule> {
                 ),
                 readOnly: true,
                 onTap: () async {
-                  await showDatePicker(context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    // range of dates that calendar shows
-                    lastDate: DateTime(DateTime
-                        .now()
-                        .year + 5),).then((pickedDate) {
-                    //then usually do the future job
-                    if (pickedDate == null) {
-                      //if user tap cancel then this function will stop
-                      return;
-                    }
-                    setState(() {
-                      //for rebuilding the ui
-                      // display new selected date
-                      formattedDate = DateFormat('MM/dd/yyyy').format(pickedDate);
-                      dateInput.text = formattedDate;
-                      // updated dateTime
-                      dateTime = DateTime(
-                          pickedDate.year, pickedDate.month, pickedDate.day,
-                          dateTime.hour, dateTime.minute);
-                    });
-                  });
+                  await DatePicker.showDateTimePicker(
+                    context,
+                    showTitleActions: true,
+                    onChanged: (date) {
+                      dateTime = date;
+                      setState(() {
+                        //for rebuilding the ui
+                        // display new selected date
+                        formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
+                        dateInput.text = formattedDate;
+                        });
+                    },
+                    onConfirm: (date) {},
+                  );
                 }),
-            // Text box for time - will show calendar
-            TextFormField(
-              controller: timeInput,
-              decoration: const InputDecoration(
-                  icon: Icon(Icons.timer),
-                  labelText: "Enter Time"
-              ),
-              readOnly: true,
-              onTap: () async {
-                final time = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay(hour: current_time.hour, minute: current_time.minute));
-                if (time == null) return;
-                setState(() {
-                  //for rebuilding the ui
-                  // display new selected time;
-                  timeInput.text = time.format(context);
-                  current_time = time;
-                  // updated time
-                  dateTime = DateTime(
-                      dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
-                });
-              },
-            ),
             const SizedBox(height: 20,),
             // Checkboxes to determine repeation or notification
             Row(
@@ -196,7 +165,15 @@ class _CreateSchedule extends State<Schedule> {
             Container(
               child: ElevatedButton(
                   onPressed: () {
-                    print(dateTime);
+                    // Created Plan Notification if remind is true
+                    if (remind) {
+                      debugPrint('Notification Scheduled for $dateTime');
+                      NotificationService().scheduleNotification(
+                          title: "LetsPlan",
+                          body: "${_titleTextController.text} deadline is here",
+                          scheduledNotificationDateTime: dateTime);
+                    }
+
                     db.add_note(description: _bodyTextController.text,
                         remind: remind,
                         repeat: repeat,
