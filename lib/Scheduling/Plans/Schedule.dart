@@ -119,7 +119,7 @@ class _CreateSchedule extends State<Schedule> {
                 controller: dateInput,
                 decoration: const InputDecoration(
                     icon: Icon(Icons.calendar_today),
-                    labelText: "Enter Date"
+                    labelText: "Enter Date and Time"
                 ),
                 readOnly: true,
                 onTap: () async {

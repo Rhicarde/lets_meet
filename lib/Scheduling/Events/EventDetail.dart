@@ -47,7 +47,7 @@ class EventDetail extends State<DisplayEventDetail> {
     User_Database db = User_Database();
 
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
-    dateInput.text = formattedDate;
+    dateInput.text = '$formattedDate ${DateFormat.jm().format(dateTime)}';
 
     return FutureBuilder<Tuple>(
         future: _loadEventData(),
@@ -131,11 +131,6 @@ class EventDetail extends State<DisplayEventDetail> {
                     ),
                     TextFormField(
                       readOnly: true,
-                      controller: _titleTextController,
-                      decoration: textInputDecoration.copyWith(hintText: 'Title'),
-                    ),
-                    TextFormField(
-                      readOnly: true,
                       controller: _bodyTextController,
                       decoration: textInputDecoration.copyWith(hintText: 'Description'),
                       style: const TextStyle(fontSize: 18),
@@ -152,17 +147,8 @@ class EventDetail extends State<DisplayEventDetail> {
                       controller: dateInput,
                       decoration: const InputDecoration(
                           icon:Icon(Icons.calendar_today),
-                          labelText: "Enter Date"
+                          labelText: "Date and Time"
                       ),
-                    ),
-                    TextFormField(
-                      readOnly: true,
-                      controller: timeInput,
-                      decoration: const InputDecoration(
-                          icon: Icon(Icons.access_time_outlined),
-                          labelText: "Pick Time"
-                      ),
-                      style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 20,),
                     Row(
@@ -171,19 +157,11 @@ class EventDetail extends State<DisplayEventDetail> {
                         const Text("Repeat? ", style: TextStyle(fontSize: 18)),
                         Checkbox(
                             value: repeat,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                repeat = value!;
-                              });
-                            }),
+                            onChanged: (bool? value) {}),
                         const Text("Remind? ", style: TextStyle(fontSize: 18)),
                         Checkbox(
                             value: remind,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                remind = value!;
-                              });
-                            }),
+                            onChanged: (bool? value) {}),
                       ],
                     ),
                     //TODO: Change Alert dialog to row

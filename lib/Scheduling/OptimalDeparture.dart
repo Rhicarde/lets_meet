@@ -117,7 +117,7 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     // Get the distance and time between the user's current position and the event location
     await getDistance(_currentAddress!, _eventAddress);
     oDT = _eventTime.subtract(Duration(seconds: duration!));
-    formattedoDT = DateFormat("HH:mm 'on' EEEE, MMMM d y").format(oDT!);
+    formattedoDT = DateFormat("h:mm a 'on' EEEE, MMMM dd, y").format(oDT!);
   }
 
   // convert AM/PM to 24 Hour
@@ -128,66 +128,118 @@ class _OptimalDeparture extends State<OptimalDeparture> {
     return formatter.format(dateTime);
   }
 
+  Future<Tuple> _loadEventData() async {
+    var docSnap = await widget.event.get();
+
+    return Tuple(docSnap.get('time'), docSnap.get('date').toDate(), docSnap.get('location'));
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user = auth.currentUser;
+    return FutureBuilder<Tuple>(
+        future: _loadEventData(),
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.hasData) {
+            _eventTime = snapshot.data!.a;
+            _eventDate = snapshot.data!.b;
+            _eventLocation = snapshot.data!.c;
 
-    widget.event.get().then((value) {
-      _eventTime = value.get('time');
-      _eventDate = value.get('date').toDate();
-      _eventLocation = value.get('location');
-    });
-    // getting time of event
-    // if _eventTime is not in the correct format HH:MM then convert
-    String _convertedTime = convertTo24HourFormat(_eventTime);
+            // getting time of event
+            // if _eventTime is not in the correct format HH:MM then convert
+            String _convertedTime = convertTo24HourFormat(_eventTime);
 
-    DateTime _eventDateTime = (_eventDate != 'N/A' && _eventTime != 'N/A')
-    // converting eventtime and eventdate to one datetime for calculation
-        ? DateTime(_eventDate.year, _eventDate.month, _eventDate.day, int.parse(_convertedTime.split(':')[0]), int.parse(_convertedTime.split(':')[1])) : DateTime.now(); // or any default value you want
+            DateTime _eventDateTime = (_eventDate != 'N/A' && _eventTime != 'N/A')
+            // converting eventtime and eventdate to one datetime for calculation
+            ? DateTime(_eventDate.year, _eventDate.month, _eventDate.day, int.parse(_convertedTime.split(':')[0]), int.parse(_convertedTime.split(':')[1])) : DateTime.now(); // or any default value you want
 
-    // calculate how long it takes to get from current address to event address
-    // subtract that time from the event time to get ODT
-    calculateODT(_eventLocation, _eventDateTime);
+            // calculate how long it takes to get from current address to event address
+            // subtract that time from the event time to get ODT
+            calculateODT(_eventLocation, _eventDateTime);
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade200,
-      appBar: AppBar(
-        title: const Text("Optimal Departure Time"),
-        elevation: 0,
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      // center card to display ODT
-      body: Center(
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 16),
-                const Text(
-                  'To Arrive on Time Depart at:',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            return Scaffold(
+              backgroundColor: Colors.grey.shade200,
+              appBar: AppBar(
+                title: const Text("Optimal Departure Time"),
+                elevation: 0,
+                backgroundColor: Colors.blue,
+              ),
+              // center card to display ODT
+              body: Center(
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                    margin: const EdgeInsets.all(16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 16),
+                        const Text('To Arrive on Time Depart at:',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(formattedoDT ?? "",
+                          style: const TextStyle(
+                          fontSize: 32, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  formattedoDT ?? "",
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+              ),
+            );
+          }
+          else {
+            return Scaffold(
+              backgroundColor: Colors.grey.shade200,
+              appBar: AppBar(
+                title: const Text("Optimal Departure Time"),
+                elevation: 0,
+                backgroundColor: Colors.blue,
+                iconTheme: const IconThemeData(color: Colors.black),
+              ),
+              // center card to display ODT
+              body: Center(
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  margin: const EdgeInsets.all(16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 16),
+                        const Text(
+                          'To Arrive on Time Depart at:',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
+              ),
+            );
+          }
+        }
+        );
   }
 }
+
+  class Tuple<T1, T2, T3> {
+  final T1 a;
+  final T2 b;
+  final T3 c;
+
+  Tuple(this.a, this.b, this.c,);
+  }

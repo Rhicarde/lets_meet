@@ -45,8 +45,7 @@ class ScheduleEdit extends State<DisplayScheduleEdit> {
     final minutes = dateTime.minute.toString().padLeft(2, '0');
 
     String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
-    dateInput.text = formattedDate;
-    TimeOfDay time = TimeOfDay(hour: 8, minute: 30);
+    dateInput.text = '$formattedDate ${DateFormat.jm().format(dateTime)}';
 
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
@@ -77,50 +76,13 @@ class ScheduleEdit extends State<DisplayScheduleEdit> {
                   maxLines: null,
                 ),
                 TextFormField(
-                    controller: timeInput,
-                    decoration: InputDecoration(
-                        icon: Icon(Icons.access_time_outlined),
-                        labelText: "Pick Time"
-                    ),
-                    readOnly: false,
-                    style: TextStyle(fontSize: 18),
-                    onTap: () async {
-                      TimeOfDay? newTime = await showTimePicker(
-                          context: context,
-                          initialTime: time
-                      );
-
-                      if (newTime == null) return;
-
-                      setState(() {
-                        time = newTime;
-                        timeInput.text = newTime.format(context);
-                      });
-                    }
-                ),
-                TextFormField(
                     controller: dateInput,
                     decoration: InputDecoration(
                         icon: Icon(Icons.calendar_today),
-                        labelText: "Enter Date"
+                        labelText: "Date and Time"
                     ),
                     readOnly: false,
                     style: TextStyle(fontSize: 18),
-                    onTap: () async{
-                      await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(DateTime.now().year + 5),
-                      ).then((pickedDate) {
-                        if (pickedDate == null) {
-                          return;
-                        }
-                        setState(() {
-                          dateTime = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
-                        });
-                      });
-                    }
                 ),
                 ElevatedButton(
                   onPressed: () {
