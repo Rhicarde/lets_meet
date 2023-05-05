@@ -71,8 +71,8 @@ class _CreateEvent extends State<Event>{
     User_Database db = User_Database();
 
     // declaring date variables for date dropdown
-    String formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
-    dateInput.text = formattedDate;
+    String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+    dateInput.text = '$formattedDate ${DateFormat.jm().format(dateTime)}';
 
     String formattedTime = current_time.format(context);
     timeInput.text = formattedTime;
@@ -156,10 +156,13 @@ class _CreateEvent extends State<Event>{
                       setState(() {
                         //for rebuilding the ui
                         // display new selected date
-                        formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
-                        dateInput.text = formattedDate;
 
-                        db_time = Time(dateTime.hour, dateTime.minute).toString();
+                        db_time = DateFormat.jm().format(dateTime);
+
+                        formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+                        dateInput.text = '$formattedDate $db_time';
+
+
                       });
                     },
                     onConfirm: (date) {},

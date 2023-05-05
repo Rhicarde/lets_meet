@@ -48,8 +48,8 @@ class _CreateSchedule extends State<Schedule> {
     User_Database db = User_Database();
 
     // Date format
-    String formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
-    dateInput.text = formattedDate;
+    String formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+    dateInput.text = '$formattedDate ${DateFormat.jm().format(dateTime)}';
     // Time format
     String formattedTime = current_time.format(context);
     timeInput.text = formattedTime;
@@ -131,8 +131,8 @@ class _CreateSchedule extends State<Schedule> {
                       setState(() {
                         //for rebuilding the ui
                         // display new selected date
-                        formattedDate = DateFormat('MM/dd/yyyy - kk:mm').format(dateTime);
-                        dateInput.text = formattedDate;
+                        formattedDate = DateFormat('MM/dd/yyyy').format(dateTime);
+                        dateInput.text = '$formattedDate ${DateFormat.jm().format(dateTime)}';
                         });
                     },
                     onConfirm: (date) {},
