@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lets_meet/Scheduling/TabManager.dart';
 import '../../Database/Schedule Database.dart';
 import '../../Shared/constants.dart';
 
@@ -124,11 +125,12 @@ class EventEdit extends State<DisplayEventEdit> {
                     'description' : description,
                     'location' : location,
                     'time' : time,
-                    'comments' : comments
+                    'comments' : comments,
+                    'titleSearch' : titleSearchParam(title: title)
                   };
 
                   widget.event.update(data);
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Pages()));
                 });
 
               },
@@ -138,5 +140,42 @@ class EventEdit extends State<DisplayEventEdit> {
         )
         )
     );
+  }
 
-          }}
+  // Breaks down the title by character in order to be used for search
+  titleSearchParam({required String title}) {
+    title = title.toLowerCase();
+
+    // List of words allow for search in between title
+    List words = title.split(' ');
+
+    List<String> titleSearchList = [];
+
+    while (words.isNotEmpty) {
+      String word = mergeTitle(words: words);
+      String temp = "";
+      for (int i = 0; i < word.length; i++){
+        temp = temp + word[i];
+        titleSearchList.add(temp);
+      }
+      words.removeAt(0);
+    }
+
+    return titleSearchList;
+  }
+
+  // merges List<String> into one string
+  mergeTitle({required List words}) {
+    String word = '';
+
+    for (int i = 0; i < words.length; i++) {
+      word += words[i];
+
+      if (i != words.length){
+        word += " ";
+      }
+    }
+
+    return word;
+  }
+}

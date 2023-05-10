@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import '../Scheduling/TabManager.dart';
+import 'Auth.dart';
 import 'Authentication/fire_auth.dart';
 
 // Class used to check that logged in user has a verified email
@@ -130,7 +131,10 @@ class _ProfileVerificationState extends State<ProfileVerification> {
                       child: const Text('Cancel',
                         style: TextStyle(fontSize: 24)
                       ),
-                      onPressed: () => FirebaseAuth.instance.signOut(),
+                      onPressed: () {
+                          FirebaseAuth.instance.signOut();
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Auth()));
+                      }
                     )
                   ],
                 ),
